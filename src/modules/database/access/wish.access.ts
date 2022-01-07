@@ -1,0 +1,78 @@
+import Database from "..";
+import Client from "../../../business/client/main.client";
+import { ClientID } from "../../../business/client/types.client";
+import { WishDto, WishID } from "../../../business/wish/types.wish";
+
+export async function createWishAccess(wish: WishDto): Promise<{ id: WishID }> {
+  return await Database.getInstance().oneOrNone(`
+        INSERT INTO wish (
+            client_id,
+            title,
+            price,
+            href,
+            created_at,
+            bought_at,
+            img_url
+        ) VALUES (
+            '${(await new Client().getOneByChatID(wish.client_id)).id}',
+            '${wish.title}',
+            '${wish.price}',
+            '${wish.href}',
+            current_timestamp,
+            NULL,
+            '${wish.img_url}'
+        ) RETURNING id;
+    `);
+}
+
+export async function getWishesByID(id: ClientID): Promise<WishDto[]> {
+  return await Database.getInstance().manyOrNone(`
+        SELECT * 
+        FROM wish
+        WHERE client_id = '${id}'
+        AND bought_at is null;
+    `);
+}
+
+export async function deleteWishByID(id: WishID): Promise<WishID> {
+  return await Database.getInstance().oneOrNone(`
+        DELETE FROM wish 
+        WHERE id = ${id}
+        RETURNING id;
+    `);
+}
+
+export async function buyWish(
+  wish_id: WishID,
+  client_id: ClientID
+): Promise<WishID> {
+  return await Database.getInstance().oneOrNone(`
+          UPDATE wish
+          SET bought_at = current_timestamp,
+              is_given = true
+          WHERE id = ${wish_id};
+
+          INSERT INTO trans (
+              client_id,
+              wish_id
+            ) VALUES (
+                (SELECT id
+                FROM client
+                WHERE lover_tgid = '${client_id}'
+                ),
+                '${wish_id}'
+            )
+            RETURNING trans.wish_id;
+      `);
+}
+
+export async function getSpendedMoney(client_uuid: string): Promise<number> {
+  const { id } = await Database.getInstance().oneOrNone(`SELECT id FROM client WHERE uuid='${client_uuid}'`)
+  return await Database.getInstance().oneOrNone(`
+    SELECT sum(w.price) as price 
+    FROM wish w 
+    LEFT JOIN trans t on t.wish_id = w.id 
+    GROUP BY t.client_id 
+    HAVING t.client_id = ${id};
+    `);
+}
