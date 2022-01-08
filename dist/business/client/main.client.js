@@ -12,7 +12,8 @@ class Client {
         return await (0, client_access_1.getOneByChatIDAccess)(id);
     }
     async getLoverByChatID(id) {
-        return await (0, client_access_1.getLoverByChatIDAccess)(id);
+        // return await getLoversByChatIDAccess(id);
+        return null;
     }
     delete(id) {
         return null;

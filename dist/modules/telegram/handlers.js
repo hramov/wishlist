@@ -18,7 +18,7 @@ async function start(instance, msg) {
     if (!candidate) {
         const { id } = await new main_client_1.default().register({
             tgid: msg.from.id,
-            username: msg.from.username,
+            username: `${msg.from.first_name} ${msg.from.last_name}`,
         });
         if (id) {
             await instance.sendMessage(msg.from.id, `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`);

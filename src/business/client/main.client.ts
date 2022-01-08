@@ -1,6 +1,6 @@
 import {
   bindLoverAccess,
-  getLoverByChatIDAccess,
+  getLoversByChatIDAccess,
   getOneByChatIDAccess,
   registerAccess,
 } from "../../modules/database/access/client.access";
@@ -21,7 +21,8 @@ export default class Client implements IClient {
   }
 
   async getLoverByChatID(id: ClientTGID): Promise<ClientDto> {
-    return await getLoverByChatIDAccess(id);
+    // return await getLoversByChatIDAccess(id);
+    return null;
   }
 
   delete(id: ClientID): ClientID {

@@ -21,7 +21,7 @@ export async function start(
   if (!candidate) {
     const { id } = await new Client().register({
       tgid: msg.from.id,
-      username: msg.from.username,
+      username: `${msg.from.first_name} ${msg.from.last_name}`,
     });
     if (id) {
       await instance.sendMessage(
@@ -29,7 +29,7 @@ export async function start(
         `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`
       );
     }
-    console.log(`Пользователь ${id} успешно зарегистрировался`);
+    console.log(`Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`);
   } else {
     await instance.sendMessage(
       msg.from.id,
