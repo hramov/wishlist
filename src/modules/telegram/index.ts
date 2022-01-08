@@ -1,6 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import Client from "../../business/client/main.client";
-import { buyWishCb, deleteWishCb } from "./cb_handlers";
+import { ClientDto } from "../../business/client/types.client";
+import { buyWishCb, deleteWishCb, showWishCb } from "./cb_handlers";
 import {
   start,
   info,
@@ -59,14 +60,21 @@ export default class Telegram {
       if (msg.text.startsWith("/start ")) {
         try {
           const lover_tgid = Number(msg.text.split(" ")[1]);
-          const client_id = msg.chat.id;
-          const result = await new Client().bindLover(client_id, lover_tgid);
+          const client: ClientDto = {
+            tgid: msg.from.id,
+            username: `${msg.from.first_name} ${msg.from.last_name}`,
+          };
+          const result = await new Client().bindLover(client, lover_tgid);
           if (typeof result == "string") {
             await this.instance.sendMessage(msg.chat.id, result);
           } else {
             await this.instance.sendMessage(
               msg.chat.id,
-              "Данные успешно обновлены"
+              `Вы получили доступ к виш-листу ${
+                (
+                  await new Client().getOneByChatID(lover_tgid)
+                ).username
+              }`
             );
           }
         } catch (err) {
@@ -85,6 +93,9 @@ export default class Telegram {
           break;
         case "buy":
           await buyWishCb(this.instance, cb);
+          break;
+        case "show":
+          await showWishCb(this.instance, cb);
           break;
       }
     });

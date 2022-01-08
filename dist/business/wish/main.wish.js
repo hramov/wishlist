@@ -33,11 +33,7 @@ class Wish {
         return null;
     }
     async getMyLoverWishes(client_id) {
-        const result = await new main_client_1.default().getLoverByChatID(client_id);
-        if (result != null && result.id) {
-            return await (0, wish_access_1.getWishesByID)(result.id);
-        }
-        return null;
+        return await (0, wish_access_1.getWishesByID)(client_id);
     }
     async deleteWish(id) {
         return await (0, wish_access_1.deleteWishByID)(id);

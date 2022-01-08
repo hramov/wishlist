@@ -1,7 +1,6 @@
 export type ClientDto = {
     id?: ClientID,
     tgid: ClientTGID,
-    lover_tgid?: ClientTGID,
     username: Username,
     uuid?: string
 }

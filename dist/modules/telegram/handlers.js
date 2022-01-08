@@ -16,14 +16,14 @@ exports.info = info;
 async function start(instance, msg) {
     const candidate = await new main_client_1.default().getOneByChatID(msg.from.id);
     if (!candidate) {
-        const { id } = await new main_client_1.default().register({
+        const client = await new main_client_1.default().register({
             tgid: msg.from.id,
             username: `${msg.from.first_name} ${msg.from.last_name}`,
         });
-        if (id) {
+        if (client && client.id) {
             await instance.sendMessage(msg.from.id, `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`);
         }
-        console.log(`Пользователь ${id} успешно зарегистрировался`);
+        console.log(`Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`);
     }
     else {
         await instance.sendMessage(msg.from.id, `Вы уже зарегистрированы! Ваш Chat ID: ${msg.from.id}`);
@@ -93,15 +93,22 @@ ${item.href}
 }
 exports.getMyWishes = getMyWishes;
 async function getMyLoverWishes(instance, msg) {
-    const result = await new main_wish_1.default(null).getMyLoverWishes(msg.chat.id);
+    // const result = await new Wish(null).getMyLoverWishes(msg.chat.id);
+    const result = await new main_client_1.default().getLoversByChatID(msg.from.id);
     console.log(result);
+    const items = [[]];
+    result.forEach((item) => {
+        items.push(new Array({
+            text: item.username,
+            callback_data: `show ${item.tgid.toString()}`,
+        }));
+    });
     if (result != null && result.length > 0) {
-        result.forEach(async (item) => {
-            await instance.sendMessage(msg.chat.id, `
-${item.title}
-Цена: ${item.price} рублей
-${item.href}
-        `);
+        await instance.sendMessage(msg.chat.id, "Добавленные пользователи", {
+            reply_markup: {
+                inline_keyboard: items,
+            },
+            // await instance.sendMessage(msg.chat.id, item.username)
         });
         return;
     }

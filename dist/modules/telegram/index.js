@@ -51,13 +51,16 @@ class Telegram {
             if (msg.text.startsWith("/start ")) {
                 try {
                     const lover_tgid = Number(msg.text.split(" ")[1]);
-                    const client_id = msg.chat.id;
-                    const result = await new main_client_1.default().bindLover(client_id, lover_tgid);
+                    const client = {
+                        tgid: msg.from.id,
+                        username: `${msg.from.first_name} ${msg.from.last_name}`,
+                    };
+                    const result = await new main_client_1.default().bindLover(client, lover_tgid);
                     if (typeof result == "string") {
                         await this.instance.sendMessage(msg.chat.id, result);
                     }
                     else {
-                        await this.instance.sendMessage(msg.chat.id, "Данные успешно обновлены");
+                        await this.instance.sendMessage(msg.chat.id, `Вы получили доступ к виш-листу ${(await new main_client_1.default().getOneByChatID(lover_tgid)).username}`);
                     }
                 }
                 catch (err) {
@@ -74,6 +77,9 @@ class Telegram {
                     break;
                 case "buy":
                     await (0, cb_handlers_1.buyWishCb)(this.instance, cb);
+                    break;
+                case "show":
+                    await (0, cb_handlers_1.showWishCb)(this.instance, cb);
                     break;
             }
         });

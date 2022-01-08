@@ -11,9 +11,8 @@ class Client {
     async getOneByChatID(id) {
         return await (0, client_access_1.getOneByChatIDAccess)(id);
     }
-    async getLoverByChatID(id) {
-        // return await getLoversByChatIDAccess(id);
-        return null;
+    async getLoversByChatID(id) {
+        return await (0, client_access_1.getLoversByChatIDAccess)(id);
     }
     delete(id) {
         return null;
@@ -22,19 +21,30 @@ class Client {
         return null;
     }
     async createLink(tgid) {
-        return `https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
+        return `
+Присоединяйся ко мне в Wish List Exchange \u{1F64C}:
+https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
     }
-    async bindLover(client_id, lover_id) {
-        const client = await (0, client_access_1.getOneByChatIDAccess)(client_id);
-        if (client == null) {
-            await (0, client_access_1.registerAccess)({
-                tgid: client_id,
-                username: "",
+    async bindLover(client, lover_id) {
+        let candidate = await (0, client_access_1.getOneByChatIDAccess)(client.tgid);
+        candidate =
+            candidate == null
+                ? (candidate = await (0, client_access_1.registerAccess)(client))
+                : candidate;
+        const lover = await (0, client_access_1.getOneByChatIDAccess)(lover_id);
+        const lovers = await (0, client_access_1.getLoversByChatIDAccess)(client.tgid);
+        console.log(lovers);
+        let exists = false;
+        if (lovers != null) {
+            lovers.forEach((l) => {
+                if (l.tgid == lover_id) {
+                    exists = true;
+                    return;
+                }
             });
         }
-        const lover = await (0, client_access_1.getOneByChatIDAccess)(lover_id);
-        if (client && lover)
-            return await (0, client_access_1.bindLoverAccess)(client_id, lover_id);
+        if (candidate && lover && !exists)
+            return await (0, client_access_1.bindLoverAccess)(client.tgid, lover_id);
         return null;
     }
 }

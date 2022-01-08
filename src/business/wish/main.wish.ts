@@ -7,7 +7,7 @@ import {
 } from "../../modules/database/access/wish.access";
 import Parser from "../../modules/parser";
 import Client from "../client/main.client";
-import { ClientID } from "../client/types.client";
+import { ClientDto, ClientID } from "../client/types.client";
 import { WishDto, WishID } from "./types.wish";
 
 export default class Wish {
@@ -38,11 +38,7 @@ export default class Wish {
   }
 
   async getMyLoverWishes(client_id: ClientID) {
-    const result = await new Client().getLoverByChatID(client_id);
-    if (result != null && result.id) {
-      return await getWishesByID(result.id);
-    }
-    return null;
+    return await getWishesByID(client_id);
   }
 
   async deleteWish(id: WishID): Promise<WishID> {

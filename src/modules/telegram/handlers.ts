@@ -3,7 +3,6 @@ import Client from "../../business/client/main.client";
 import Wish from "../../business/wish/main.wish";
 import { startKeyboard } from "./keyboard";
 import { getUUIDByChatID } from "../database/access/client.access";
-import { deleteWishByID } from "../database/access/wish.access";
 
 export async function info(
   instance: TelegramBot,
@@ -19,17 +18,19 @@ export async function start(
 ): Promise<Error | null> {
   const candidate = await new Client().getOneByChatID(msg.from.id);
   if (!candidate) {
-    const { id } = await new Client().register({
+    const client = await new Client().register({
       tgid: msg.from.id,
       username: `${msg.from.first_name} ${msg.from.last_name}`,
     });
-    if (id) {
+    if (client && client.id) {
       await instance.sendMessage(
         msg.from.id,
         `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`
       );
     }
-    console.log(`Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`);
+    console.log(
+      `Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`
+    );
   } else {
     await instance.sendMessage(
       msg.from.id,
@@ -61,7 +62,7 @@ ${result.title}
 Стоимость: ${result.price} руб.`
     );
   } else {
-    await instance.sendMessage(msg.chat.id, "Ошибка при обработке...")
+    await instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
   }
   console.log(result);
   return null;
@@ -124,18 +125,24 @@ export async function getMyLoverWishes(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).getMyLoverWishes(msg.chat.id);
+  // const result = await new Wish(null).getMyLoverWishes(msg.chat.id);
+  const result = await new Client().getLoversByChatID(msg.from.id);
   console.log(result);
+  const items: TelegramBot.InlineKeyboardButton[] | { text: string; callback_data: string; }[][] = [[]]
+
+  result.forEach((item) => {
+    items.push(new Array({
+      text: item.username,
+      callback_data: `show ${item.tgid.toString()}`,
+    }));
+  });
+
   if (result != null && result.length > 0) {
-    result.forEach(async (item) => {
-      await instance.sendMessage(
-        msg.chat.id,
-        `
-${item.title}
-Цена: ${item.price} рублей
-${item.href}
-        `
-      );
+    await instance.sendMessage(msg.chat.id, "Добавленные пользователи", {
+      reply_markup: {
+        inline_keyboard: items,
+      },
+      // await instance.sendMessage(msg.chat.id, item.username)
     });
     return;
   }

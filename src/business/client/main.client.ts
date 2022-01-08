@@ -7,8 +7,8 @@ import {
 import { IClient } from "./interface.client";
 import { ClientDto, ClientID, ClientTGID } from "./types.client";
 
-export default class Client implements IClient {
-  async register(client: ClientDto): Promise<{ id: ClientID }> {
+export default class Client {
+  async register(client: ClientDto): Promise<ClientDto> {
     return await registerAccess(client);
   }
 
@@ -20,9 +20,8 @@ export default class Client implements IClient {
     return await getOneByChatIDAccess(id);
   }
 
-  async getLoverByChatID(id: ClientTGID): Promise<ClientDto> {
-    // return await getLoversByChatIDAccess(id);
-    return null;
+  async getLoversByChatID(id: ClientTGID): Promise<ClientDto[]> {
+    return await getLoversByChatIDAccess(id);
   }
 
   delete(id: ClientID): ClientID {
@@ -34,19 +33,31 @@ export default class Client implements IClient {
   }
 
   async createLink(tgid: ClientID): Promise<string> {
-    return `https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
+    return `
+Присоединяйся ко мне в Wish List Exchange \u{1F64C}:
+https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
   }
 
-  async bindLover(client_id: ClientID, lover_id: ClientID) {
-    const client = await getOneByChatIDAccess(client_id);
-    if (client == null) {
-      await registerAccess({
-        tgid: client_id,
-        username: "",
+  async bindLover(client: ClientDto, lover_id: ClientID): Promise<any> {
+    let candidate = await getOneByChatIDAccess(client.tgid);
+    candidate =
+      candidate == null
+        ? (candidate = await registerAccess(client))
+        : candidate;
+    const lover = await getOneByChatIDAccess(lover_id);
+    const lovers = await getLoversByChatIDAccess(client.tgid);
+    console.log(lovers);
+    let exists = false;
+    if (lovers != null) {
+      lovers.forEach((l) => {
+        if (l.tgid == lover_id) {
+          exists = true;
+          return;
+        }
       });
     }
-    const lover = await getOneByChatIDAccess(lover_id);
-    if (client && lover) return await bindLoverAccess(client_id, lover_id);
+    if (candidate && lover && !exists)
+      return await bindLoverAccess(client.tgid, lover_id);
     return null;
   }
 }
