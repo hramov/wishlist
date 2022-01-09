@@ -16,6 +16,8 @@ services:
         - DB_PASSWORD=grafserega1997                                                         
         - DB_NAME=wishlist                                        
         - TOKEN=2057752320:AAFdlHgxrXt5LndoaPHZ9iq4cTXGqNJ4YEk
+      volumes:
+        - logs:logs
       networks:
         - postgres
     
@@ -37,6 +39,7 @@ services:
 
 volumes:
   postgres:
+  logs:
 
 networks:
   postgres:
