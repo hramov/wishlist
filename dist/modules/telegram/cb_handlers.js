@@ -11,6 +11,7 @@ async function deleteWishCb(instance, cb) {
     const result = await (0, wish_access_1.deleteWishByID)(Number(cb.data.split(" ")[1]));
     if (result != null) {
         await instance.deleteMessage(cb.from.id, cb.message.message_id.toString());
+        await instance.sendMessage(cb.from.id, `Желание успешно удалено`);
         return;
     }
     await instance.sendMessage(cb.from.id, `Ошибка при удалении желания!`);
