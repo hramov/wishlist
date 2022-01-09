@@ -16,6 +16,7 @@ services:
         - DB_PASSWORD=grafserega1997                                                         
         - DB_NAME=wishlist                                        
         - TOKEN=2057752320:AAFdlHgxrXt5LndoaPHZ9iq4cTXGqNJ4YEk
+        - LOGGER_FOLDER=logs
       volumes:
         - logs:/usr/src/app/logs
       networks:
