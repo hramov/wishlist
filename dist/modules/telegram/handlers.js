@@ -10,7 +10,12 @@ const keyboard_1 = require("./keyboard");
 const client_access_1 = require("../database/access/client.access");
 const logger_1 = __importDefault(require("../logger"));
 async function info(instance, msg) {
-    await instance.sendMessage(msg.from.id, "Hello");
+    await instance.sendMessage(msg.from.id, `
+Привет! Это бот, который помогает в выборе подарков.
+Можно добавить сколько угодно пользователей Telegram, чтобы видеть их виш-листы.
+
+Для начала использования бота и регистрации системы используйте команду /start
+  `);
     return null;
 }
 exports.info = info;

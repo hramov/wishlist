@@ -9,7 +9,12 @@ export async function info(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  await instance.sendMessage(msg.from.id, "Hello");
+  await instance.sendMessage(msg.from.id, `
+Привет! Это бот, который помогает в выборе подарков.
+Можно добавить сколько угодно пользователей Telegram, чтобы видеть их виш-листы.
+
+Для начала использования бота и регистрации системы используйте команду /start
+  `);
   return null;
 }
 
