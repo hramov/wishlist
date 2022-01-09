@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const database_1 = __importDefault(require("../database"));
+const logger_1 = __importDefault(require("../logger"));
 const router_1 = __importDefault(require("./router"));
 class Server {
     constructor(port) {
@@ -18,9 +19,9 @@ class Server {
             return db.err;
         }
         server.use("/api/wishlist/", router_1.default);
-        server.use("/", express_1.default.static('public'));
+        server.use("/", express_1.default.static("public"));
         server.listen(this.port || process.env.APP_PORT, () => {
-            console.log(`The server has been started at port ${this.port || process.env.APP_PORT}`);
+            logger_1.default.log("info", `The server has been started at port ${this.port || process.env.APP_PORT}`);
         });
     }
 }

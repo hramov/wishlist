@@ -7,9 +7,11 @@ const server_1 = __importDefault(require("./modules/server"));
 const telegram_1 = __importDefault(require("./modules/telegram"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const parser_1 = __importDefault(require("./modules/parser"));
+const logger_1 = __importDefault(require("./modules/logger"));
 dotenv_1.default.config();
 class Main {
     async start() {
+        const logger = new logger_1.default();
         const server = new server_1.default(Number(process.env.APP_PORT) || 5000);
         const err = await server.createServer();
         if (err) {
