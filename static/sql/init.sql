@@ -121,6 +121,43 @@ CREATE TABLE public.client_lover (
 ALTER TABLE public.client_lover OWNER TO postgres;
 
 --
+-- Name: min_wish; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.min_wish (
+    id integer NOT NULL,
+    client_id integer,
+    href character varying(255) NOT NULL,
+    created_at timestamp with time zone,
+    managed boolean
+);
+
+
+ALTER TABLE public.min_wish OWNER TO postgres;
+
+--
+-- Name: min_wish_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.min_wish_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.min_wish_id_seq OWNER TO postgres;
+
+--
+-- Name: min_wish_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.min_wish_id_seq OWNED BY public.min_wish.id;
+
+
+--
 -- Name: trans; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -139,13 +176,14 @@ ALTER TABLE public.trans OWNER TO postgres;
 CREATE TABLE public.wish (
     id integer NOT NULL,
     client_id integer,
-    title character varying(255) NOT NULL,
-    price numeric NOT NULL,
-    href character varying(255) NOT NULL,
     created_at timestamp with time zone NOT NULL,
     bought_at timestamp with time zone,
     img_url character varying(255),
-    is_given boolean
+    is_given boolean,
+    title character varying(255),
+    try integer,
+    price numeric,
+    href character varying(255) NOT NULL
 );
 
 
@@ -181,10 +219,58 @@ ALTER TABLE ONLY public.client ALTER COLUMN id SET DEFAULT nextval('public.clien
 
 
 --
+-- Name: min_wish id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.min_wish ALTER COLUMN id SET DEFAULT nextval('public.min_wish_id_seq'::regclass);
+
+
+--
 -- Name: wish id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.wish ALTER COLUMN id SET DEFAULT nextval('public.wish_id_seq'::regclass);
+
+
+--
+-- Data for Name: client; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.client (id, tgid, username, created_at, uuid) FROM stdin;
+\.
+
+
+--
+-- Data for Name: client_lover; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.client_lover (client_id, lover_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: min_wish; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.min_wish (id, client_id, href, created_at, managed) FROM stdin;
+\.
+
+
+--
+-- Data for Name: trans; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.trans (client_id, wish_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: wish; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.wish (id, client_id, created_at, bought_at, img_url, is_given, title, try, price, href) FROM stdin;
+\.
+
 
 --
 -- Name: client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
@@ -194,10 +280,17 @@ SELECT pg_catalog.setval('public.client_id_seq', 17, true);
 
 
 --
+-- Name: min_wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.min_wish_id_seq', 2, true);
+
+
+--
 -- Name: wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.wish_id_seq', 22, true);
+SELECT pg_catalog.setval('public.wish_id_seq', 34, true);
 
 
 --
@@ -206,6 +299,14 @@ SELECT pg_catalog.setval('public.wish_id_seq', 22, true);
 
 ALTER TABLE ONLY public.client
     ADD CONSTRAINT client_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: min_wish min_wish_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.min_wish
+    ADD CONSTRAINT min_wish_pkey PRIMARY KEY (id);
 
 
 --
@@ -230,6 +331,14 @@ ALTER TABLE ONLY public.client_lover
 
 ALTER TABLE ONLY public.client_lover
     ADD CONSTRAINT client_lover_lover_id_fkey FOREIGN KEY (lover_id) REFERENCES public.client(id);
+
+
+--
+-- Name: min_wish min_wish_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.min_wish
+    ADD CONSTRAINT min_wish_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.client(id);
 
 
 --
