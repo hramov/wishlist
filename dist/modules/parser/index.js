@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const router_1 = __importDefault(require("./router"));
 const default_json_1 = require("./conf/default.json");
+const wish_access_1 = require("../database/access/wish.access");
+const logger_1 = __importDefault(require("../logger"));
 class Parser {
     constructor(options) {
         this.options = options;
@@ -28,6 +30,7 @@ class Parser {
     }
     async parse(url, client_id) {
         if (this.pages < Number(process.env.MAX_PAGES || 3)) {
+            logger_1.default.log("info", `Начинаю обработку запроса: ${url}`);
             const page = await this.browser.newPage();
             this.pages++;
             try {
@@ -46,10 +49,11 @@ class Parser {
                     return Object.assign({ client_id }, result);
                 }
             }
-            catch (err) {
+            catch (_err) {
+                const err = _err;
                 await page.close();
                 this.pages--;
-                console.log(err);
+                logger_1.default.log("error", `Ошибка обработки запроса: ${err.message}`);
             }
         }
         else {
@@ -65,6 +69,28 @@ class Parser {
         this.isStarted = false;
         Parser.exists = false;
         Parser.instance = null;
+    }
+    async demon(instance) {
+        setInterval(async () => {
+            const hrefs = await (0, wish_access_1.getUnmanagedWishes)();
+            for (let i = 0; i < hrefs.length; i++) {
+                try {
+                    const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
+                    await (0, wish_access_1.createWishAccess)(wish);
+                    logger_1.default.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
+                    await (0, wish_access_1.deleteManaged)(hrefs[i].id);
+                    await instance.sendMessage(hrefs[i].client_id, `Успешно обработал запрос: ${hrefs[i].href}`);
+                }
+                catch (_err) {
+                    const err = _err;
+                    logger_1.default.log("error", `Ошибка при обработке запроса: ${err.message}`);
+                }
+                await this.timeout(15000);
+            }
+        }, 10000);
+    }
+    timeout(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 }
 exports.default = Parser;

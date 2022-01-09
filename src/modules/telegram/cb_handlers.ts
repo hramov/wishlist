@@ -46,8 +46,8 @@ export async function showWishCb(
       await instance.sendMessage(
         cb.from.id,
         `
-${wish.title}
-${wish.price}
+${wish.title || `Название: (еще нет данных)`}
+Цена: ${wish.price || '(еще нет данных)'} рублей
 ${wish.href}
         `
       );

@@ -1,36 +1,16 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const wish_access_1 = require("../../modules/database/access/wish.access");
-const parser_1 = __importDefault(require("../../modules/parser"));
 class Wish {
     constructor(href) {
         this.href = href;
         this.href = href;
     }
     async create(client_id) {
-        try {
-            const result = await new parser_1.default(null).parse(this.href, client_id);
-            if (result != null) {
-                await (0, wish_access_1.createWishAccess)(result);
-                return result;
-            }
-        }
-        catch (_err) {
-            const err = _err;
-            console.log(err.message);
-        }
-        return null;
+        const result = await (0, wish_access_1.createMinWishAccess)(client_id, this.href);
+        if (result && result.id)
+            return result;
     }
-    // async getMyWishes(client_id: ClientTGID): Promise<WishDto[]> {
-    //   const result = await new Client().getOneByChatID(client_id);
-    //   if (result != null && result.id) {
-    //     return await getWishesByID(result.id);
-    //   }
-    //   return null;
-    // }
     async getWishesByID(client_id) {
         return await (0, wish_access_1.getWishesByID)(client_id);
     }

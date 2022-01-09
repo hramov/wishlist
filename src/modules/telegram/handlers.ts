@@ -3,6 +3,7 @@ import Client from "../../business/client/main.client";
 import Wish from "../../business/wish/main.wish";
 import { startKeyboard } from "./keyboard";
 import { getUUIDByChatID } from "../database/access/client.access";
+import Logger from "../logger";
 
 export async function info(
   instance: TelegramBot,
@@ -49,24 +50,15 @@ export async function createWish(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  const message = await instance.sendMessage(
-    msg.chat.id,
-    "Добавлено в очередь на обработку..."
-  );
-  new Wish(new URL(msg.text).toString()).create(msg.chat.id.toString()).then((data) => {
-    if (data != null) {
-      instance.sendMessage(
-        msg.chat.id,
-        `
-Успешно обработал: 
-${data.title} 
-Стоимость: ${data.price} руб.`
+  new Wish(new URL(msg.text).toString())
+    .create(msg.chat.id.toString())
+    .then((data) => {
+      Logger.log(
+        "info",
+        `Желание с ID=${data.id} добавлено в очередь на обработку`
       );
-      instance.deleteMessage(msg.chat.id, message.message_id.toString())
-    } else {
-      instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
-    }
-  });
+      instance.sendMessage(msg.chat.id, "Добавлено в очередь на обработку...");
+    });
   return null;
 }
 
@@ -96,8 +88,8 @@ export async function getMyWishes(
       instance.sendMessage(
         msg.chat.id,
         `
-${item.title}
-Цена: ${item.price} рублей
+${item.title || "Название: (еще нет данных)"}
+Цена: ${item.price || "(еще нет данных)"} рублей
 ${item.href}
         `,
         {

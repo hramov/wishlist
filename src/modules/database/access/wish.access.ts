@@ -4,7 +4,6 @@ import { WishDto, WishID } from "../../../business/wish/types.wish";
 import { getOneByChatIDAccess } from "./client.access";
 
 export async function createWishAccess(wish: WishDto): Promise<{ id: WishID }> {
-  console.log(wish);
   return await Database.getInstance().oneOrNone(`
         INSERT INTO wish (
             client_id,
@@ -24,6 +23,43 @@ export async function createWishAccess(wish: WishDto): Promise<{ id: WishID }> {
             '${wish.img_url}'
         ) RETURNING id;
     `);
+}
+
+export async function createMinWishAccess(
+  client_id: ClientTGID,
+  href: string
+): Promise<{ id: number }> {
+  return await Database.getInstance().oneOrNone(`
+        INSERT INTO min_wish (
+            client_id,
+            href,
+            created_at,
+            managed
+        ) VALUES (
+            ${(await getOneByChatIDAccess(client_id)).id},
+            '${href}',
+            current_timestamp,
+            false
+        ) RETURNING id;
+    `);
+}
+
+export async function getUnmanagedWishes(): Promise<
+  Array<{ id: number; href: string; client_id: ClientTGID }>
+> {
+  return await Database.getInstance().manyOrNone(`
+    SELECT mw.id as id, c.tgid as client_id, mw.href as href
+    FROM min_wish mw
+    LEFT JOIN client c on c.id = mw.client_id
+    WHERE managed = false;
+  `);
+}
+
+export async function deleteManaged(id: number) {
+  return await Database.getInstance().manyOrNone(`
+    DELETE FROM min_wish
+    WHERE id = ${id};
+  `);
 }
 
 export async function getWishesByID(id: ClientTGID): Promise<WishDto[]> {

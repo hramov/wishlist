@@ -1,13 +1,13 @@
 import {
   buyWish,
+  createMinWishAccess,
   createWishAccess,
   deleteWishByID,
   getSpendedMoney,
   getWishesByID,
 } from "../../modules/database/access/wish.access";
 import Parser from "../../modules/parser";
-import Client from "../client/main.client";
-import { ClientDto, ClientID, ClientTGID } from "../client/types.client";
+import { ClientID, ClientTGID } from "../client/types.client";
 import { WishDto, WishID } from "./types.wish";
 
 export default class Wish {
@@ -15,27 +15,10 @@ export default class Wish {
     this.href = href;
   }
 
-  async create(client_id: ClientTGID): Promise<WishDto> {
-    try {
-      const result = await new Parser(null).parse(this.href, client_id);
-      if (result != null) {
-        await createWishAccess(result);
-        return result;
-      }
-    } catch (_err) {
-      const err: Error = _err as Error;
-      console.log(err.message);
-    }
-    return null;
+  async create(client_id: ClientTGID): Promise<{id: number}> {
+    const result = await createMinWishAccess(client_id, this.href);
+    if (result && result.id) return result
   }
-
-  // async getMyWishes(client_id: ClientTGID): Promise<WishDto[]> {
-  //   const result = await new Client().getOneByChatID(client_id);
-  //   if (result != null && result.id) {
-  //     return await getWishesByID(result.id);
-  //   }
-  //   return null;
-  // }
 
   async getWishesByID(client_id: ClientTGID) {
     return await getWishesByID(client_id);

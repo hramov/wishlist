@@ -34,8 +34,8 @@ async function showWishCb(instance, cb) {
     if (result != null && result.length > 0) {
         result.forEach(async (wish) => {
             await instance.sendMessage(cb.from.id, `
-${wish.title}
-${wish.price}
+${wish.title || `Название: (еще нет данных)`}
+Цена: ${wish.price || '(еще нет данных)'} рублей
 ${wish.href}
         `);
         });

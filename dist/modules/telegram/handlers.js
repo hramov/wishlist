@@ -8,6 +8,7 @@ const main_client_1 = __importDefault(require("../../business/client/main.client
 const main_wish_1 = __importDefault(require("../../business/wish/main.wish"));
 const keyboard_1 = require("./keyboard");
 const client_access_1 = require("../database/access/client.access");
+const logger_1 = __importDefault(require("../logger"));
 async function info(instance, msg) {
     await instance.sendMessage(msg.from.id, "Hello");
     return null;
@@ -33,18 +34,11 @@ async function start(instance, msg) {
 }
 exports.start = start;
 async function createWish(instance, msg) {
-    const message = await instance.sendMessage(msg.chat.id, "Добавлено в очередь на обработку...");
-    new main_wish_1.default(new URL(msg.text).toString()).create(msg.chat.id.toString()).then((data) => {
-        if (data != null) {
-            instance.sendMessage(msg.chat.id, `
-Успешно обработал: 
-${data.title} 
-Стоимость: ${data.price} руб.`);
-            instance.deleteMessage(msg.chat.id, message.message_id.toString());
-        }
-        else {
-            instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
-        }
+    new main_wish_1.default(new URL(msg.text).toString())
+        .create(msg.chat.id.toString())
+        .then((data) => {
+        logger_1.default.log("info", `Желание с ID=${data.id} добавлено в очередь на обработку`);
+        instance.sendMessage(msg.chat.id, "Добавлено в очередь на обработку...");
     });
     return null;
 }
@@ -68,8 +62,8 @@ async function getMyWishes(instance, msg) {
     if (result != null && result.length > 0) {
         result.forEach(async (item) => {
             instance.sendMessage(msg.chat.id, `
-${item.title}
-Цена: ${item.price} рублей
+${item.title || "Название: (еще нет данных)"}
+Цена: ${item.price || "(еще нет данных)"} рублей
 ${item.href}
         `, {
                 reply_markup: {

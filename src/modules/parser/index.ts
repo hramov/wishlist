@@ -1,8 +1,15 @@
 import puppeteer, { Browser } from "puppeteer";
 import { WishDto } from "../../business/wish/types.wish";
 import Router from "./router";
-import { userAgents, headers } from "./conf/default.json";
+import { userAgents } from "./conf/default.json";
 import { ClientTGID } from "../../business/client/types.client";
+import {
+  createWishAccess,
+  deleteManaged,
+  getUnmanagedWishes,
+} from "../database/access/wish.access";
+import Logger from "../logger";
+import TelegramBot from "node-telegram-bot-api";
 
 export default class Parser {
   private browser: Browser = null;
@@ -31,6 +38,7 @@ export default class Parser {
 
   async parse(url: string, client_id: ClientTGID): Promise<WishDto> {
     if (this.pages < Number(process.env.MAX_PAGES || 3)) {
+      Logger.log("info", `Начинаю обработку запроса: ${url}`);
       const page = await this.browser.newPage();
       this.pages++;
       try {
@@ -52,13 +60,14 @@ export default class Parser {
             ...result,
           };
         }
-      } catch (err) {
+      } catch (_err) {
+        const err: Error = _err as Error;
         await page.close();
         this.pages--;
-        console.log(err);
+        Logger.log("error", `Ошибка обработки запроса: ${err.message}`);
       }
     } else {
-      return null
+      return null;
     }
     return null;
   }
@@ -72,5 +81,32 @@ export default class Parser {
     this.isStarted = false;
     Parser.exists = false;
     Parser.instance = null;
+  }
+
+  async demon(instance: TelegramBot) {
+    setInterval(async () => {
+      const hrefs = await getUnmanagedWishes();
+
+      for (let i = 0; i < hrefs.length; i++) {
+        try {
+          const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
+          await createWishAccess(wish);
+          Logger.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
+          await deleteManaged(hrefs[i].id);
+          await instance.sendMessage(
+            hrefs[i].client_id,
+            `Успешно обработал запрос: ${hrefs[i].href}`
+          );
+        } catch (_err) {
+          const err: Error = _err as Error;
+          Logger.log("error", `Ошибка при обработке запроса: ${err.message}`);
+        }
+        await this.timeout(15000);
+      }
+    }, 10000);
+  }
+
+  timeout(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

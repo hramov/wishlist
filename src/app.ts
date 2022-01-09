@@ -8,7 +8,6 @@ dotenv.config();
 
 class Main {
   public async start(): Promise<Error> {
-
     const logger = new Logger();
     const server = new Server(Number(process.env.APP_PORT) || 5000);
     const err = await server.createServer();
@@ -17,7 +16,7 @@ class Main {
     }
 
     const bot = new Telegram(process.env.TOKEN);
-    bot.createBot();
+    const instance = bot.createBot();
 
     const parser = new Parser({
       // Параметры, которые передаются на вход puppeteer при запуске браузера
@@ -36,6 +35,7 @@ class Main {
     });
 
     await parser.create();
+    await parser.demon(instance);
   }
 }
 

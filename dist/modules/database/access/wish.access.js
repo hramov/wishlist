@@ -3,11 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.createWishAccess = void 0;
+exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.deleteManaged = exports.getUnmanagedWishes = exports.createMinWishAccess = exports.createWishAccess = void 0;
 const __1 = __importDefault(require(".."));
 const client_access_1 = require("./client.access");
 async function createWishAccess(wish) {
-    console.log(wish);
     return await __1.default.getInstance().oneOrNone(`
         INSERT INTO wish (
             client_id,
@@ -29,6 +28,38 @@ async function createWishAccess(wish) {
     `);
 }
 exports.createWishAccess = createWishAccess;
+async function createMinWishAccess(client_id, href) {
+    return await __1.default.getInstance().oneOrNone(`
+        INSERT INTO min_wish (
+            client_id,
+            href,
+            created_at,
+            managed
+        ) VALUES (
+            ${(await (0, client_access_1.getOneByChatIDAccess)(client_id)).id},
+            '${href}',
+            current_timestamp,
+            false
+        ) RETURNING id;
+    `);
+}
+exports.createMinWishAccess = createMinWishAccess;
+async function getUnmanagedWishes() {
+    return await __1.default.getInstance().manyOrNone(`
+    SELECT mw.id as id, c.tgid as client_id, mw.href as href
+    FROM min_wish mw
+    LEFT JOIN client c on c.id = mw.client_id
+    WHERE managed = false;
+  `);
+}
+exports.getUnmanagedWishes = getUnmanagedWishes;
+async function deleteManaged(id) {
+    return await __1.default.getInstance().manyOrNone(`
+    DELETE FROM min_wish
+    WHERE id = ${id};
+  `);
+}
+exports.deleteManaged = deleteManaged;
 async function getWishesByID(id) {
     return await __1.default.getInstance().manyOrNone(`
         SELECT * 

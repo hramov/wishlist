@@ -18,7 +18,7 @@ class Main {
             return err;
         }
         const bot = new telegram_1.default(process.env.TOKEN);
-        bot.createBot();
+        const instance = bot.createBot();
         const parser = new parser_1.default({
             // Параметры, которые передаются на вход puppeteer при запуске браузера
             args: [
@@ -35,6 +35,7 @@ class Main {
             ignoreDefaultArgs: ["--disable-extensions"],
         });
         await parser.create();
+        await parser.demon(instance);
     }
 }
 const main = new Main();

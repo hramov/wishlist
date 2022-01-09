@@ -8,7 +8,6 @@ import {
   createWishDialog,
   getMyWishes,
   createLink,
-  buyWishDialog,
   createStatLink,
   getMyLovers,
 } from "./handlers";
@@ -20,9 +19,10 @@ export default class Telegram {
     this.token = token;
   }
 
-  public createBot(): void {
+  public createBot(): TelegramBot {
     this.instance = new TelegramBot(this.token, { polling: true });
     this.handler();
+    return this.instance;
   }
 
   private handler() {
