@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const wish_access_1 = require("../../modules/database/access/wish.access");
 const parser_1 = __importDefault(require("../../modules/parser"));
-const main_client_1 = __importDefault(require("../client/main.client"));
 class Wish {
     constructor(href) {
         this.href = href;
@@ -25,14 +24,14 @@ class Wish {
         }
         return null;
     }
-    async getMyWishes(client_id) {
-        const result = await new main_client_1.default().getOneByChatID(client_id);
-        if (result != null && result.id) {
-            return await (0, wish_access_1.getWishesByID)(result.id);
-        }
-        return null;
-    }
-    async getMyLoverWishes(client_id) {
+    // async getMyWishes(client_id: ClientTGID): Promise<WishDto[]> {
+    //   const result = await new Client().getOneByChatID(client_id);
+    //   if (result != null && result.id) {
+    //     return await getWishesByID(result.id);
+    //   }
+    //   return null;
+    // }
+    async getWishesByID(client_id) {
         return await (0, wish_access_1.getWishesByID)(client_id);
     }
     async deleteWish(id) {

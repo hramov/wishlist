@@ -32,14 +32,14 @@ class Telegram {
                 case "\u2728 Создать желание":
                     await (0, handlers_1.createWishDialog)(this.instance, msg);
                     break;
-                case "\u2714 Отметить подаренное":
-                    await (0, handlers_1.buyWishDialog)(this.instance, msg);
-                    break;
+                // case "\u2714 Отметить подаренное":
+                //   await buyWishDialog(this.instance, msg);
+                //   break;
                 case "\u{1F4E6} Посмотреть мои желания":
                     await (0, handlers_1.getMyWishes)(this.instance, msg);
                     break;
                 case "\u{1F381} Посмотреть, что подарить":
-                    await (0, handlers_1.getMyLoverWishes)(this.instance, msg);
+                    await (0, handlers_1.getMyLovers)(this.instance, msg);
                     break;
                 case "\u270C Создать приглашение":
                     await (0, handlers_1.createLink)(this.instance, msg);
@@ -51,6 +51,10 @@ class Telegram {
             if (msg.text.startsWith("/start ")) {
                 try {
                     const lover_tgid = msg.text.split(" ")[1];
+                    if (lover_tgid == msg.chat.id.toString()) {
+                        await this.instance.sendMessage(msg.chat.id, `Нельзя добавить самого себя`);
+                        return;
+                    }
                     const lover = await new main_client_1.default().getOneByChatID(lover_tgid);
                     const client = {
                         tgid: msg.from.id.toString(),

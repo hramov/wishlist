@@ -25,6 +25,7 @@ export async function buyWishCb(
     cb.from.id
   );
   if (result != null) {
+    await instance.deleteMessage(cb.from.id, cb.message.message_id.toString());
     await instance.sendMessage(cb.from.id, `Желание успешно получено!`);
     return;
   }
@@ -36,8 +37,8 @@ export async function showWishCb(
   cb: TelegramBot.CallbackQuery
 ) {
   await instance.answerCallbackQuery(cb.id);
-  const result = await new Wish(null).getMyLoverWishes(
-    Number(cb.data.split(" ")[1])
+  const result = await new Wish(null).getWishesByID(
+    cb.data.split(" ")[1]
   );
   if (result != null && result.length > 0) {
     result.forEach(async (wish) => {

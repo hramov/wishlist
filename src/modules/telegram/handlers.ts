@@ -89,7 +89,7 @@ export async function getMyWishes(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).getMyWishes(msg.chat.id.toString());
+  const result = await new Wish(null).getWishesByID(msg.chat.id.toString());
   console.log(result);
   if (result != null && result.length > 0) {
     result.forEach(async (item) => {
@@ -123,7 +123,7 @@ ${item.href}
   await instance.sendMessage(msg.chat.id, "Нет добавленных желаний");
 }
 
-export async function getMyLoverWishes(
+export async function getMyLovers(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {

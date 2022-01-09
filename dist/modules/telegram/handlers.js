@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createStatLink = exports.buyWishDialog = exports.buyWishHandler = exports.createLink = exports.deleteWish = exports.getMyLoverWishes = exports.getMyWishes = exports.createWishDialog = exports.createWish = exports.start = exports.info = void 0;
+exports.createStatLink = exports.buyWishDialog = exports.buyWishHandler = exports.createLink = exports.deleteWish = exports.getMyLovers = exports.getMyWishes = exports.createWishDialog = exports.createWish = exports.start = exports.info = void 0;
 const main_client_1 = __importDefault(require("../../business/client/main.client"));
 const main_wish_1 = __importDefault(require("../../business/wish/main.wish"));
 const keyboard_1 = require("./keyboard");
@@ -63,7 +63,7 @@ async function createWishDialog(instance, msg) {
 }
 exports.createWishDialog = createWishDialog;
 async function getMyWishes(instance, msg) {
-    const result = await new main_wish_1.default(null).getMyWishes(msg.chat.id.toString());
+    const result = await new main_wish_1.default(null).getWishesByID(msg.chat.id.toString());
     console.log(result);
     if (result != null && result.length > 0) {
         result.forEach(async (item) => {
@@ -93,7 +93,7 @@ ${item.href}
     await instance.sendMessage(msg.chat.id, "Нет добавленных желаний");
 }
 exports.getMyWishes = getMyWishes;
-async function getMyLoverWishes(instance, msg) {
+async function getMyLovers(instance, msg) {
     const result = await new main_client_1.default().getLoversByChatID(msg.from.id.toString());
     console.log(result);
     const items = [[]];
@@ -113,7 +113,7 @@ async function getMyLoverWishes(instance, msg) {
     }
     await instance.sendMessage(msg.chat.id, "Нечего дарить :-(");
 }
-exports.getMyLoverWishes = getMyLoverWishes;
+exports.getMyLovers = getMyLovers;
 async function deleteWish(instance, msg) {
     const result = await new main_wish_1.default(null).deleteWish(Number(msg.text));
     if (result != null) {

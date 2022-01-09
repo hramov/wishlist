@@ -7,10 +7,10 @@ import {
   info,
   createWishDialog,
   getMyWishes,
-  getMyLoverWishes,
   createLink,
   buyWishDialog,
   createStatLink,
+  getMyLovers,
 } from "./handlers";
 
 export default class Telegram {
@@ -40,14 +40,14 @@ export default class Telegram {
         case "\u2728 Создать желание":
           await createWishDialog(this.instance, msg);
           break;
-        case "\u2714 Отметить подаренное":
-          await buyWishDialog(this.instance, msg);
-          break;
+        // case "\u2714 Отметить подаренное":
+        //   await buyWishDialog(this.instance, msg);
+        //   break;
         case "\u{1F4E6} Посмотреть мои желания":
           await getMyWishes(this.instance, msg);
           break;
         case "\u{1F381} Посмотреть, что подарить":
-          await getMyLoverWishes(this.instance, msg);
+          await getMyLovers(this.instance, msg);
           break;
         case "\u270C Создать приглашение":
           await createLink(this.instance, msg);
@@ -59,10 +59,17 @@ export default class Telegram {
 
       if (msg.text.startsWith("/start ")) {
         try {
-          
           const lover_tgid = msg.text.split(" ")[1];
+
+          if (lover_tgid == msg.chat.id.toString()) {
+            await this.instance.sendMessage(
+              msg.chat.id,
+              `Нельзя добавить самого себя`
+            );
+            return;
+          }
           const lover = await new Client().getOneByChatID(lover_tgid);
-          
+
           const client: ClientDto = {
             tgid: msg.from.id.toString(),
             username: `${msg.from.first_name} ${msg.from.last_name}`,
@@ -72,19 +79,14 @@ export default class Telegram {
           if (result === true) {
             await this.instance.sendMessage(
               msg.chat.id,
-              `Вы получили доступ к виш-листу ${
-                lover.username
-              }`
+              `Вы получили доступ к виш-листу ${lover.username}`
             );
           } else {
             await this.instance.sendMessage(
               msg.chat.id,
-              `У вас уже есть доступ к виш-листу ${
-                lover.username
-              }`
+              `У вас уже есть доступ к виш-листу ${lover.username}`
             );
           }
-
         } catch (err) {
           console.log(err);
           await this.instance.sendMessage(msg.chat.id, "Ошибка");

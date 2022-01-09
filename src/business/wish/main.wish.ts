@@ -29,15 +29,15 @@ export default class Wish {
     return null;
   }
 
-  async getMyWishes(client_id: ClientTGID): Promise<WishDto[]> {
-    const result = await new Client().getOneByChatID(client_id);
-    if (result != null && result.id) {
-      return await getWishesByID(result.id);
-    }
-    return null;
-  }
+  // async getMyWishes(client_id: ClientTGID): Promise<WishDto[]> {
+  //   const result = await new Client().getOneByChatID(client_id);
+  //   if (result != null && result.id) {
+  //     return await getWishesByID(result.id);
+  //   }
+  //   return null;
+  // }
 
-  async getMyLoverWishes(client_id: ClientID) {
+  async getWishesByID(client_id: ClientTGID) {
     return await getWishesByID(client_id);
   }
 

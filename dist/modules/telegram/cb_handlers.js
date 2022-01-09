@@ -20,6 +20,7 @@ async function buyWishCb(instance, cb) {
     await instance.answerCallbackQuery(cb.id);
     const result = await new main_wish_1.default(null).markWishAsGifted(Number(cb.data.split(" ")[1]), cb.from.id);
     if (result != null) {
+        await instance.deleteMessage(cb.from.id, cb.message.message_id.toString());
         await instance.sendMessage(cb.from.id, `Желание успешно получено!`);
         return;
     }
@@ -28,7 +29,7 @@ async function buyWishCb(instance, cb) {
 exports.buyWishCb = buyWishCb;
 async function showWishCb(instance, cb) {
     await instance.answerCallbackQuery(cb.id);
-    const result = await new main_wish_1.default(null).getMyLoverWishes(Number(cb.data.split(" ")[1]));
+    const result = await new main_wish_1.default(null).getWishesByID(cb.data.split(" ")[1]);
     if (result != null && result.length > 0) {
         result.forEach(async (wish) => {
             await instance.sendMessage(cb.from.id, `

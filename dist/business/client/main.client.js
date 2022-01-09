@@ -22,7 +22,7 @@ class Client {
     }
     async createLink(tgid) {
         return `
-Присоединяйся ко мне в Wish List Exchange \u{1F64C}:
+Присоединяйся ко мне в Wish List Exchange \u{1F64C} (перейди по ссылке и нажми кнопку START):
 https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
     }
     async bindLover(client, lover_id) {
