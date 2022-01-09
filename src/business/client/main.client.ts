@@ -39,9 +39,16 @@ https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
 
   async bindLover(client: ClientDto, lover_id: ClientTGID): Promise<boolean> {
     const candidate = await getOneByChatIDAccess(client.tgid);
+    const lover = await getOneByChatIDAccess(lover_id);
+
     if (candidate == null || candidate.id == null) {
       client = await registerAccess(client);
     }
+
+    if (lover == null || lover.id == null) {
+      return false;
+    }
+
     return (await bindLoverAccess(client.tgid, lover_id)).result;
   }
 }

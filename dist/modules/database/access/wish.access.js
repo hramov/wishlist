@@ -3,66 +3,45 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.deleteManaged = exports.getUnmanagedWishes = exports.createMinWishAccess = exports.createWishAccess = void 0;
+exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.getUnmanagedWishes = exports.createMinWishAccess = exports.createWishAccess = void 0;
 const __1 = __importDefault(require(".."));
 const client_access_1 = require("./client.access");
 async function createWishAccess(wish) {
     return await __1.default.getInstance().oneOrNone(`
-        INSERT INTO wish (
-            client_id,
-            title,
-            price,
-            href,
-            created_at,
-            bought_at,
-            img_url
-        ) VALUES (
-            ${(await (0, client_access_1.getOneByChatIDAccess)(wish.client_id)).id},
-            '${wish.title}',
-            '${wish.price}',
-            '${wish.href}',
-            current_timestamp,
-            NULL,
-            '${wish.img_url}'
-        ) RETURNING id;
+
+        UPDATE wish
+        SET title = '${wish.title}',
+            price = '${wish.price}',
+            img_url = '${wish.img_url}'
+        WHERE href = '${wish.href};
     `);
 }
 exports.createWishAccess = createWishAccess;
 async function createMinWishAccess(client_id, href) {
     return await __1.default.getInstance().oneOrNone(`
-        INSERT INTO min_wish (
+        INSERT INTO wish (
             client_id,
             href,
-            created_at,
-            managed
+            created_at
         ) VALUES (
             ${(await (0, client_access_1.getOneByChatIDAccess)(client_id)).id},
             '${href}',
-            current_timestamp,
-            false
+            current_timestamp
         ) RETURNING id;
     `);
 }
 exports.createMinWishAccess = createMinWishAccess;
 async function getUnmanagedWishes() {
     return await __1.default.getInstance().manyOrNone(`
-    SELECT mw.id as id, c.tgid as client_id, mw.href as href
-    FROM min_wish mw
-    LEFT JOIN client c on c.id = mw.client_id
-    WHERE managed = false;
+    SELECT id, href, client_id
+    FROM wish
+    WHERE title IS NULL OR price IS NULL;
   `);
 }
 exports.getUnmanagedWishes = getUnmanagedWishes;
-async function deleteManaged(id) {
-    return await __1.default.getInstance().manyOrNone(`
-    DELETE FROM min_wish
-    WHERE id = ${id};
-  `);
-}
-exports.deleteManaged = deleteManaged;
 async function getWishesByID(id) {
     return await __1.default.getInstance().manyOrNone(`
-        SELECT * 
+        SELECT *
         FROM wish
         WHERE client_id = (SELECT id FROM client WHERE tgid = '${id}')
         AND bought_at is null;

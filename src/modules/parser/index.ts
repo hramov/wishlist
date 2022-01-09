@@ -5,7 +5,6 @@ import { userAgents } from "./conf/default.json";
 import { ClientTGID } from "../../business/client/types.client";
 import {
   createWishAccess,
-  deleteManaged,
   getUnmanagedWishes,
 } from "../database/access/wish.access";
 import Logger from "../logger";
@@ -84,24 +83,28 @@ export default class Parser {
   }
 
   async demon(instance: TelegramBot) {
+    let isGo = true;
     setInterval(async () => {
-      const hrefs = await getUnmanagedWishes();
+      if (isGo) {
+        const hrefs = await getUnmanagedWishes();
 
-      for (let i = 0; i < hrefs.length; i++) {
-        try {
-          const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
-          await createWishAccess(wish);
-          Logger.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
-          await deleteManaged(hrefs[i].id);
-          await instance.sendMessage(
-            hrefs[i].client_id,
-            `Успешно обработал запрос: ${hrefs[i].href}`
-          );
-        } catch (_err) {
-          const err: Error = _err as Error;
-          Logger.log("error", `Ошибка при обработке запроса: ${err.message}`);
+        for (let i = 0; i < hrefs.length; i++) {
+          try {
+            isGo = false;
+            const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
+            await createWishAccess(wish);
+            Logger.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
+            await instance.sendMessage(
+              hrefs[i].client_id,
+              `Успешно обработал запрос: ${hrefs[i].href}`
+            );
+          } catch (_err) {
+            const err: Error = _err as Error;
+            Logger.log("error", `Ошибка при обработке запроса: ${err.message}`);
+          }
+          await this.timeout(15000);
+          isGo = true;
         }
-        await this.timeout(15000);
       }
     }, 10000);
   }

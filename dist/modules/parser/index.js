@@ -71,21 +71,25 @@ class Parser {
         Parser.instance = null;
     }
     async demon(instance) {
+        let isGo = true;
         setInterval(async () => {
-            const hrefs = await (0, wish_access_1.getUnmanagedWishes)();
-            for (let i = 0; i < hrefs.length; i++) {
-                try {
-                    const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
-                    await (0, wish_access_1.createWishAccess)(wish);
-                    logger_1.default.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
-                    await (0, wish_access_1.deleteManaged)(hrefs[i].id);
-                    await instance.sendMessage(hrefs[i].client_id, `Успешно обработал запрос: ${hrefs[i].href}`);
+            if (isGo) {
+                const hrefs = await (0, wish_access_1.getUnmanagedWishes)();
+                for (let i = 0; i < hrefs.length; i++) {
+                    try {
+                        isGo = false;
+                        const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
+                        await (0, wish_access_1.createWishAccess)(wish);
+                        logger_1.default.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
+                        await instance.sendMessage(hrefs[i].client_id, `Успешно обработал запрос: ${hrefs[i].href}`);
+                    }
+                    catch (_err) {
+                        const err = _err;
+                        logger_1.default.log("error", `Ошибка при обработке запроса: ${err.message}`);
+                    }
+                    await this.timeout(15000);
+                    isGo = true;
                 }
-                catch (_err) {
-                    const err = _err;
-                    logger_1.default.log("error", `Ошибка при обработке запроса: ${err.message}`);
-                }
-                await this.timeout(15000);
             }
         }, 10000);
     }
