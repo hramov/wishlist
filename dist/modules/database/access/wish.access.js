@@ -5,8 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.createWishAccess = void 0;
 const __1 = __importDefault(require(".."));
-const main_client_1 = __importDefault(require("../../../business/client/main.client"));
+const client_access_1 = require("./client.access");
 async function createWishAccess(wish) {
+    console.log(wish);
     return await __1.default.getInstance().oneOrNone(`
         INSERT INTO wish (
             client_id,
@@ -17,7 +18,7 @@ async function createWishAccess(wish) {
             bought_at,
             img_url
         ) VALUES (
-            '${(await new main_client_1.default().getOneByChatID(wish.client_id)).id}',
+            ${(await (0, client_access_1.getOneByChatIDAccess)(wish.client_id)).id},
             '${wish.title}',
             '${wish.price}',
             '${wish.href}',

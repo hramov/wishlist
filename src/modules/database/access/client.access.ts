@@ -28,10 +28,11 @@ export async function getOneByChatIDAccess(id: ClientTGID): Promise<ClientDto> {
 }
 
 export async function getIsLoverAccess(client_id: ClientTGID, lover_id: ClientTGID) {
-  return await Database.getInstance().query(`
-    SELECT lover_id
+  return await Database.getInstance().oneOrNone(`
+    SELECT *
     FROM client_lover
-    WHERE client_id = '${client_id}
+    WHERE client_id = '${client_id}'
+    AND lover_id = '${lover_id}'
   `)
 }
 
@@ -51,23 +52,9 @@ export async function getLoversByChatIDAccess(
     `);
 }
 
-export async function bindLoverAccess(client_id: ClientID, lover_id: ClientID) {
-  return await Database.getInstance().query(`
-    INSERT INTO client_lover (
-      client_id,
-      lover_id
-    ) VALUES (
-      (SELECT id FROM client WHERE tgid = '${client_id}'),
-      (SELECT id FROM client WHERE tgid = '${lover_id}')
-    );
-
-    INSERT INTO client_lover (
-      client_id,
-      lover_id
-    ) VALUES (
-      (SELECT id FROM client WHERE tgid = '${lover_id}'),
-      (SELECT id FROM client WHERE tgid = '${client_id}')
-    );
+export async function bindLoverAccess(client_id: ClientTGID, lover_id: ClientTGID): Promise<{result: boolean}> {
+  return await Database.getInstance().oneOrNone(`
+    SELECT * FROM bind_lover('${client_id}', '${lover_id}') as result;
   `);
 }
 

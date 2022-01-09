@@ -202,6 +202,37 @@ ALTER TABLE ONLY public.wish
 
 
 --
+-- Custom functions
+--
+
+CREATE OR REPLACE FUNCTION bind_lover(client_id_var varchar, lover_id_var varchar) returns boolean as $$
+  BEGIN
+  IF NOT EXISTS (SELECT 1 FROM client_lover cl
+    WHERE cl.client_id = (SELECT id FROM client c WHERE c.tgid = client_id_var)
+    AND cl.lover_id = (SELECT id FROM client c WHERE c.tgid = lover_id_var)
+  )
+  THEN
+      INSERT INTO client_lover (
+        client_id,
+        lover_id
+      ) VALUES (
+        (SELECT id FROM client WHERE tgid = client_id_var),
+        (SELECT id FROM client WHERE tgid = lover_id_var)
+      );
+      INSERT INTO client_lover (
+        client_id,
+        lover_id
+      ) VALUES (
+        (SELECT id FROM client WHERE tgid = lover_id_var),
+        (SELECT id FROM client WHERE tgid = client_id_var)
+      );
+      RETURN true;
+  ELSE
+      RETURN false;
+  END IF;
+  END
+  $$ language plpgsql;
+--
 -- PostgreSQL database dump complete
 --
 

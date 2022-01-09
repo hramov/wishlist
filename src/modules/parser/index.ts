@@ -2,6 +2,7 @@ import puppeteer, { Browser } from "puppeteer";
 import { WishDto } from "../../business/wish/types.wish";
 import Router from "./router";
 import { userAgents, headers } from "./conf/default.json";
+import { ClientTGID } from "../../business/client/types.client";
 
 export default class Parser {
   private browser: Browser = null;
@@ -28,7 +29,7 @@ export default class Parser {
     return this.browser;
   }
 
-  async parse(url: string, client_id: number): Promise<WishDto> {
+  async parse(url: string, client_id: ClientTGID): Promise<WishDto> {
     if (this.pages < Number(process.env.MAX_PAGES || 3)) {
       const page = await this.browser.newPage();
       this.pages++;

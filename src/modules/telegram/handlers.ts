@@ -16,10 +16,10 @@ export async function start(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  const candidate = await new Client().getOneByChatID(msg.from.id);
+  const candidate = await new Client().getOneByChatID(msg.from.id.toString());
   if (!candidate) {
     const client = await new Client().register({
-      tgid: msg.from.id,
+      tgid: msg.from.id.toString(),
       username: `${msg.from.first_name} ${msg.from.last_name}`,
     });
     if (client && client.id) {
@@ -49,22 +49,24 @@ export async function createWish(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  await instance.sendMessage(msg.chat.id, "Начинаю обработку...");
-  const result = await new Wish(new URL(msg.text).toString()).create(
-    msg.chat.id
+  const message = await instance.sendMessage(
+    msg.chat.id,
+    "Добавлено в очередь на обработку..."
   );
-  if (result != null) {
-    await instance.sendMessage(
-      msg.chat.id,
-      `
+  new Wish(new URL(msg.text).toString()).create(msg.chat.id.toString()).then((data) => {
+    if (data != null) {
+      instance.sendMessage(
+        msg.chat.id,
+        `
 Успешно обработал: 
-${result.title} 
-Стоимость: ${result.price} руб.`
-    );
-  } else {
-    await instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
-  }
-  console.log(result);
+${data.title} 
+Стоимость: ${data.price} руб.`
+      );
+      instance.deleteMessage(msg.chat.id, message.message_id.toString())
+    } else {
+      instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
+    }
+  });
   return null;
 }
 
@@ -87,7 +89,7 @@ export async function getMyWishes(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).getMyWishes(msg.chat.id);
+  const result = await new Wish(null).getMyWishes(msg.chat.id.toString());
   console.log(result);
   if (result != null && result.length > 0) {
     result.forEach(async (item) => {
@@ -125,16 +127,19 @@ export async function getMyLoverWishes(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  // const result = await new Wish(null).getMyLoverWishes(msg.chat.id);
-  const result = await new Client().getLoversByChatID(msg.from.id);
+  const result = await new Client().getLoversByChatID(msg.from.id.toString());
   console.log(result);
-  const items: TelegramBot.InlineKeyboardButton[] | { text: string; callback_data: string; }[][] = [[]]
+  const items:
+    | TelegramBot.InlineKeyboardButton[]
+    | { text: string; callback_data: string }[][] = [[]];
 
   result.forEach((item) => {
-    items.push(new Array({
-      text: item.username,
-      callback_data: `show ${item.tgid.toString()}`,
-    }));
+    items.push(
+      new Array({
+        text: item.username,
+        callback_data: `show ${item.tgid.toString()}`,
+      })
+    );
   });
 
   if (result != null && result.length > 0) {
@@ -142,7 +147,6 @@ export async function getMyLoverWishes(
       reply_markup: {
         inline_keyboard: items,
       },
-      // await instance.sendMessage(msg.chat.id, item.username)
     });
     return;
   }

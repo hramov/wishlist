@@ -1,6 +1,8 @@
+import { ClientTGID } from "../client/types.client";
+
 export type WishDto = {
     id?: number
-    client_id?: number,
+    client_id?: ClientTGID,
     title: string,
     price: number,
     href?: string,

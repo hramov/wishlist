@@ -4,7 +4,7 @@ import {
   getOneByChatIDAccess,
   registerAccess,
 } from "../../modules/database/access/client.access";
-import { IClient } from "./interface.client";
+// import { IClient } from "./interface.client";
 import { ClientDto, ClientID, ClientTGID } from "./types.client";
 
 export default class Client {
@@ -38,26 +38,11 @@ export default class Client {
 https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
   }
 
-  async bindLover(client: ClientDto, lover_id: ClientID): Promise<any> {
-    let candidate = await getOneByChatIDAccess(client.tgid);
-    candidate =
-      candidate == null
-        ? (candidate = await registerAccess(client))
-        : candidate;
-    const lover = await getOneByChatIDAccess(lover_id);
-    const lovers = await getLoversByChatIDAccess(client.tgid);
-    console.log(lovers);
-    let exists = false;
-    if (lovers != null) {
-      lovers.forEach((l) => {
-        if (l.tgid == lover_id) {
-          exists = true;
-          return;
-        }
-      });
+  async bindLover(client: ClientDto, lover_id: ClientTGID): Promise<boolean> {
+    const candidate = await getOneByChatIDAccess(client.tgid);
+    if (!candidate || !candidate.id) {
+      client = await registerAccess(client);
     }
-    if (candidate && lover && !exists)
-      return await bindLoverAccess(client.tgid, lover_id);
-    return null;
+    return (await bindLoverAccess(client.tgid, lover_id)).result;
   }
 }

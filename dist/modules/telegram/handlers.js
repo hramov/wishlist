@@ -14,10 +14,10 @@ async function info(instance, msg) {
 }
 exports.info = info;
 async function start(instance, msg) {
-    const candidate = await new main_client_1.default().getOneByChatID(msg.from.id);
+    const candidate = await new main_client_1.default().getOneByChatID(msg.from.id.toString());
     if (!candidate) {
         const client = await new main_client_1.default().register({
-            tgid: msg.from.id,
+            tgid: msg.from.id.toString(),
             username: `${msg.from.first_name} ${msg.from.last_name}`,
         });
         if (client && client.id) {
@@ -33,18 +33,19 @@ async function start(instance, msg) {
 }
 exports.start = start;
 async function createWish(instance, msg) {
-    await instance.sendMessage(msg.chat.id, "Начинаю обработку...");
-    const result = await new main_wish_1.default(new URL(msg.text).toString()).create(msg.chat.id);
-    if (result != null) {
-        await instance.sendMessage(msg.chat.id, `
+    const message = await instance.sendMessage(msg.chat.id, "Добавлено в очередь на обработку...");
+    new main_wish_1.default(new URL(msg.text).toString()).create(msg.chat.id.toString()).then((data) => {
+        if (data != null) {
+            instance.sendMessage(msg.chat.id, `
 Успешно обработал: 
-${result.title} 
-Стоимость: ${result.price} руб.`);
-    }
-    else {
-        await instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
-    }
-    console.log(result);
+${data.title} 
+Стоимость: ${data.price} руб.`);
+            instance.deleteMessage(msg.chat.id, message.message_id.toString());
+        }
+        else {
+            instance.sendMessage(msg.chat.id, "Ошибка при обработке...");
+        }
+    });
     return null;
 }
 exports.createWish = createWish;
@@ -62,7 +63,7 @@ async function createWishDialog(instance, msg) {
 }
 exports.createWishDialog = createWishDialog;
 async function getMyWishes(instance, msg) {
-    const result = await new main_wish_1.default(null).getMyWishes(msg.chat.id);
+    const result = await new main_wish_1.default(null).getMyWishes(msg.chat.id.toString());
     console.log(result);
     if (result != null && result.length > 0) {
         result.forEach(async (item) => {
@@ -93,8 +94,7 @@ ${item.href}
 }
 exports.getMyWishes = getMyWishes;
 async function getMyLoverWishes(instance, msg) {
-    // const result = await new Wish(null).getMyLoverWishes(msg.chat.id);
-    const result = await new main_client_1.default().getLoversByChatID(msg.from.id);
+    const result = await new main_client_1.default().getLoversByChatID(msg.from.id.toString());
     console.log(result);
     const items = [[]];
     result.forEach((item) => {
@@ -108,7 +108,6 @@ async function getMyLoverWishes(instance, msg) {
             reply_markup: {
                 inline_keyboard: items,
             },
-            // await instance.sendMessage(msg.chat.id, item.username)
         });
         return;
     }

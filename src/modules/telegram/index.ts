@@ -59,24 +59,32 @@ export default class Telegram {
 
       if (msg.text.startsWith("/start ")) {
         try {
-          const lover_tgid = Number(msg.text.split(" ")[1]);
+          
+          const lover_tgid = msg.text.split(" ")[1];
+          const lover = await new Client().getOneByChatID(lover_tgid);
+          
           const client: ClientDto = {
-            tgid: msg.from.id,
+            tgid: msg.from.id.toString(),
             username: `${msg.from.first_name} ${msg.from.last_name}`,
           };
+
           const result = await new Client().bindLover(client, lover_tgid);
-          if (typeof result == "string") {
-            await this.instance.sendMessage(msg.chat.id, result);
-          } else {
+          if (result === true) {
             await this.instance.sendMessage(
               msg.chat.id,
               `Вы получили доступ к виш-листу ${
-                (
-                  await new Client().getOneByChatID(lover_tgid)
-                ).username
+                lover.username
+              }`
+            );
+          } else {
+            await this.instance.sendMessage(
+              msg.chat.id,
+              `У вас уже есть доступ к виш-листу ${
+                lover.username
               }`
             );
           }
+
         } catch (err) {
           console.log(err);
           await this.instance.sendMessage(msg.chat.id, "Ошибка");

@@ -50,17 +50,18 @@ class Telegram {
             }
             if (msg.text.startsWith("/start ")) {
                 try {
-                    const lover_tgid = Number(msg.text.split(" ")[1]);
+                    const lover_tgid = msg.text.split(" ")[1];
+                    const lover = await new main_client_1.default().getOneByChatID(lover_tgid);
                     const client = {
-                        tgid: msg.from.id,
+                        tgid: msg.from.id.toString(),
                         username: `${msg.from.first_name} ${msg.from.last_name}`,
                     };
                     const result = await new main_client_1.default().bindLover(client, lover_tgid);
-                    if (typeof result == "string") {
-                        await this.instance.sendMessage(msg.chat.id, result);
+                    if (result === true) {
+                        await this.instance.sendMessage(msg.chat.id, `Вы получили доступ к виш-листу ${lover.username}`);
                     }
                     else {
-                        await this.instance.sendMessage(msg.chat.id, `Вы получили доступ к виш-листу ${(await new main_client_1.default().getOneByChatID(lover_tgid)).username}`);
+                        await this.instance.sendMessage(msg.chat.id, `У вас уже есть доступ к виш-листу ${lover.username}`);
                     }
                 }
                 catch (err) {

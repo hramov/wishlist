@@ -1,9 +1,11 @@
 import Database from "..";
 import Client from "../../../business/client/main.client";
-import { ClientID } from "../../../business/client/types.client";
+import { ClientID, ClientTGID } from "../../../business/client/types.client";
 import { WishDto, WishID } from "../../../business/wish/types.wish";
+import { getOneByChatIDAccess } from "./client.access";
 
 export async function createWishAccess(wish: WishDto): Promise<{ id: WishID }> {
+  console.log(wish);
   return await Database.getInstance().oneOrNone(`
         INSERT INTO wish (
             client_id,
@@ -14,7 +16,7 @@ export async function createWishAccess(wish: WishDto): Promise<{ id: WishID }> {
             bought_at,
             img_url
         ) VALUES (
-            '${(await new Client().getOneByChatID(wish.client_id)).id}',
+            ${(await getOneByChatIDAccess(wish.client_id)).id},
             '${wish.title}',
             '${wish.price}',
             '${wish.href}',

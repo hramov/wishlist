@@ -28,10 +28,11 @@ async function getOneByChatIDAccess(id) {
 }
 exports.getOneByChatIDAccess = getOneByChatIDAccess;
 async function getIsLoverAccess(client_id, lover_id) {
-    return await __1.default.getInstance().query(`
-    SELECT lover_id
+    return await __1.default.getInstance().oneOrNone(`
+    SELECT *
     FROM client_lover
-    WHERE client_id = '${client_id}
+    WHERE client_id = '${client_id}'
+    AND lover_id = '${lover_id}'
   `);
 }
 exports.getIsLoverAccess = getIsLoverAccess;
@@ -50,22 +51,8 @@ async function getLoversByChatIDAccess(tgid) {
 }
 exports.getLoversByChatIDAccess = getLoversByChatIDAccess;
 async function bindLoverAccess(client_id, lover_id) {
-    return await __1.default.getInstance().query(`
-    INSERT INTO client_lover (
-      client_id,
-      lover_id
-    ) VALUES (
-      (SELECT id FROM client WHERE tgid = '${client_id}'),
-      (SELECT id FROM client WHERE tgid = '${lover_id}')
-    );
-
-    INSERT INTO client_lover (
-      client_id,
-      lover_id
-    ) VALUES (
-      (SELECT id FROM client WHERE tgid = '${lover_id}'),
-      (SELECT id FROM client WHERE tgid = '${client_id}')
-    );
+    return await __1.default.getInstance().oneOrNone(`
+    SELECT * FROM bind_lover('${client_id}', '${lover_id}') as result;
   `);
 }
 exports.bindLoverAccess = bindLoverAccess;

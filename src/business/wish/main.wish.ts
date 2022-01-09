@@ -7,7 +7,7 @@ import {
 } from "../../modules/database/access/wish.access";
 import Parser from "../../modules/parser";
 import Client from "../client/main.client";
-import { ClientDto, ClientID } from "../client/types.client";
+import { ClientDto, ClientID, ClientTGID } from "../client/types.client";
 import { WishDto, WishID } from "./types.wish";
 
 export default class Wish {
@@ -15,7 +15,7 @@ export default class Wish {
     this.href = href;
   }
 
-  async create(client_id: number): Promise<WishDto> {
+  async create(client_id: ClientTGID): Promise<WishDto> {
     try {
       const result = await new Parser(null).parse(this.href, client_id);
       if (result != null) {
@@ -29,7 +29,7 @@ export default class Wish {
     return null;
   }
 
-  async getMyWishes(client_id: ClientID): Promise<WishDto[]> {
+  async getMyWishes(client_id: ClientTGID): Promise<WishDto[]> {
     const result = await new Client().getOneByChatID(client_id);
     if (result != null && result.id) {
       return await getWishesByID(result.id);

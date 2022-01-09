@@ -6,5 +6,5 @@ export type ClientDto = {
 }
 
 export type ClientID = number;
-export type ClientTGID = number;
+export type ClientTGID = string;
 export type Username = string;
