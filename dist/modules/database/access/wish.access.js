@@ -13,7 +13,7 @@ async function createWishAccess(wish) {
         SET title = '${wish.title}',
             price = '${wish.price}',
             img_url = '${wish.img_url}'
-        WHERE href = '${wish.href};
+        WHERE href = '${wish.href}';
     `);
 }
 exports.createWishAccess = createWishAccess;
