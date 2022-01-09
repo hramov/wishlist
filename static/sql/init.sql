@@ -16,6 +16,57 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
+--
+-- Name: bind_lover(character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.bind_lover(client_id_var character varying, lover_id_var character varying) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+  BEGIN
+  IF NOT EXISTS (SELECT 1 FROM client_lover cl
+    WHERE cl.client_id = (SELECT id FROM client c WHERE c.tgid = client_id_var)
+    AND cl.lover_id = (SELECT id FROM client c WHERE c.tgid = lover_id_var)
+  )
+  THEN
+      INSERT INTO client_lover (
+        client_id,
+        lover_id
+      ) VALUES (
+        (SELECT id FROM client WHERE tgid = client_id_var),
+        (SELECT id FROM client WHERE tgid = lover_id_var)
+      );
+      INSERT INTO client_lover (
+        client_id,
+        lover_id
+      ) VALUES (
+        (SELECT id FROM client WHERE tgid = lover_id_var),
+        (SELECT id FROM client WHERE tgid = client_id_var)
+      );
+      RETURN true;
+  ELSE
+      RETURN false;
+  END IF;
+  END
+  $$;
+
+
+ALTER FUNCTION public.bind_lover(client_id_var character varying, lover_id_var character varying) OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -27,9 +78,9 @@ SET default_table_access_method = heap;
 CREATE TABLE public.client (
     id integer NOT NULL,
     tgid character varying(10) NOT NULL,
-    lover_tgid character varying(10),
     username character varying(255) NOT NULL,
-    created_at timestamp with time zone NOT NULL
+    created_at timestamp with time zone NOT NULL,
+    uuid uuid DEFAULT public.uuid_generate_v4()
 );
 
 
@@ -58,6 +109,18 @@ ALTER SEQUENCE public.client_id_seq OWNED BY public.client.id;
 
 
 --
+-- Name: client_lover; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.client_lover (
+    client_id integer,
+    lover_id integer
+);
+
+
+ALTER TABLE public.client_lover OWNER TO postgres;
+
+--
 -- Name: trans; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -81,7 +144,8 @@ CREATE TABLE public.wish (
     href character varying(255) NOT NULL,
     created_at timestamp with time zone NOT NULL,
     bought_at timestamp with time zone,
-    img_url character varying(255)
+    img_url character varying(255),
+    is_given boolean
 );
 
 
@@ -127,7 +191,20 @@ ALTER TABLE ONLY public.wish ALTER COLUMN id SET DEFAULT nextval('public.wish_id
 -- Data for Name: client; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.client (id, tgid, lover_tgid, username, created_at) FROM stdin;
+--COPY public.client (id, tgid, username, created_at, uuid) FROM stdin;
+--10	666845778	Анастасия Куталова	2022-01-08 13:17:18.474538+00	9c8e973f-fe07-409b-8daa-9a0d79126c24
+--16	12345678	John Doe	2022-01-08 15:18:33.563127+00	ab727b0d-24f8-4103-9956-5952b5cddac7
+--17	174055421	Sergey Khramov	2022-01-09 03:47:39.086529+00	993dd735-06f4-4f84-a503-7a4e4156800c
+--\.
+
+
+--
+-- Data for Name: client_lover; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.client_lover (client_id, lover_id) FROM stdin;
+17	10
+10	17
 \.
 
 
@@ -143,22 +220,24 @@ COPY public.trans (client_id, wish_id) FROM stdin;
 -- Data for Name: wish; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.wish (id, client_id, title, price, href, created_at, bought_at, img_url) FROM stdin;
-\.
+--COPY public.wish (id, client_id, title, price, href, created_at, bought_at, img_url, is_given) FROM stdin;
+--21	17	Мышь беспроводная Genius NX-7000, черный	539	https://www.ozon.ru/product/mysh-besprovodnaya-genius-nx-7000-chernaya-black-g5-hanger-2-4ghz-wireless-blueeye-1200-dpi-1xaa-160366416/?sh=p-cl6JnN	2022-01-09 04:00:16.841654+00	\N	https://cdn1.ozone.ru/s3/cms/05/t8f/wc200/doodle_1.png	\N
+--22	17	Мышь беспроводная Genius NX-7000, черный	539	https://www.ozon.ru/product/mysh-besprovodnaya-genius-nx-7000-chernaya-black-g5-hanger-2-4ghz-wireless-blueeye-1200-dpi-1xaa-160366416/?sh=p-cl6JnN	2022-01-09 04:02:59.785221+00	\N	https://cdn1.ozone.ru/s3/cms/05/t8f/wc200/doodle_1.png	\N
+--\.
 
 
 --
 -- Name: client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.client_id_seq', 6, true);
+SELECT pg_catalog.setval('public.client_id_seq', 17, true);
 
 
 --
 -- Name: wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.wish_id_seq', 8, true);
+SELECT pg_catalog.setval('public.wish_id_seq', 22, true);
 
 
 --
@@ -175,6 +254,22 @@ ALTER TABLE ONLY public.client
 
 ALTER TABLE ONLY public.wish
     ADD CONSTRAINT wish_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: client_lover client_lover_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.client_lover
+    ADD CONSTRAINT client_lover_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.client(id);
+
+
+--
+-- Name: client_lover client_lover_lover_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.client_lover
+    ADD CONSTRAINT client_lover_lover_id_fkey FOREIGN KEY (lover_id) REFERENCES public.client(id);
 
 
 --
@@ -201,37 +296,6 @@ ALTER TABLE ONLY public.wish
     ADD CONSTRAINT wish_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.client(id);
 
 
---
--- Custom functions
---
-
-CREATE OR REPLACE FUNCTION bind_lover(client_id_var varchar, lover_id_var varchar) returns boolean as $$
-  BEGIN
-  IF NOT EXISTS (SELECT 1 FROM client_lover cl
-    WHERE cl.client_id = (SELECT id FROM client c WHERE c.tgid = client_id_var)
-    AND cl.lover_id = (SELECT id FROM client c WHERE c.tgid = lover_id_var)
-  )
-  THEN
-      INSERT INTO client_lover (
-        client_id,
-        lover_id
-      ) VALUES (
-        (SELECT id FROM client WHERE tgid = client_id_var),
-        (SELECT id FROM client WHERE tgid = lover_id_var)
-      );
-      INSERT INTO client_lover (
-        client_id,
-        lover_id
-      ) VALUES (
-        (SELECT id FROM client WHERE tgid = lover_id_var),
-        (SELECT id FROM client WHERE tgid = client_id_var)
-      );
-      RETURN true;
-  ELSE
-      RETURN false;
-  END IF;
-  END
-  $$ language plpgsql;
 --
 -- PostgreSQL database dump complete
 --
