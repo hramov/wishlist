@@ -17,7 +17,7 @@ services:
         - DB_NAME=wishlist                                        
         - TOKEN=2057752320:AAFdlHgxrXt5LndoaPHZ9iq4cTXGqNJ4YEk
       volumes:
-        - logs:logs
+        - logs:/usr/src/app/logs
       networks:
         - postgres
     

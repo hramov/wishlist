@@ -50,6 +50,7 @@ RUN npm install && npm install puppeteer --unsafe-perm --allow-root
 RUN chmod -R o+rwx node_modules/puppeteer/.local-chromium
 COPY ./dist/ ./
 COPY ./static ./static
+RUN mkdir logs
 RUN ls
 
 EXPOSE 5000
