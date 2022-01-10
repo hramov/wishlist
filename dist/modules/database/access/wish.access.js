@@ -33,8 +33,10 @@ async function createMinWishAccess(client_id, href) {
 exports.createMinWishAccess = createMinWishAccess;
 async function getUnmanagedWishes() {
     return await __1.default.getInstance().manyOrNone(`
-    SELECT id, href, client_id
-    FROM wish
+    SELECT w.id as id, w.href as href, c.tgid as client_id
+    FROM wish w
+    LEFT JOIN client c
+    ON c.id = w.client_id
     WHERE title IS NULL OR price IS NULL;
   `);
 }

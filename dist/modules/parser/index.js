@@ -56,9 +56,6 @@ class Parser {
                 logger_1.default.log("error", `Ошибка обработки запроса: ${err.message}`);
             }
         }
-        else {
-            return null;
-        }
         return null;
     }
     async getUserAgent() {
@@ -72,6 +69,7 @@ class Parser {
     }
     async demon(instance) {
         let isGo = true;
+        let sleep = 10000;
         setInterval(async () => {
             if (isGo) {
                 const hrefs = await (0, wish_access_1.getUnmanagedWishes)();
@@ -79,19 +77,23 @@ class Parser {
                     try {
                         isGo = false;
                         const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
+                        if (wish == null)
+                            sleep *= 2;
                         await (0, wish_access_1.createWishAccess)(wish);
                         logger_1.default.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
                         await instance.sendMessage(hrefs[i].client_id, `Успешно обработал запрос: ${hrefs[i].href}`);
+                        sleep /= 2;
                     }
                     catch (_err) {
                         const err = _err;
                         logger_1.default.log("error", `Ошибка при обработке запроса: ${err.message}`);
+                        sleep *= 2;
                     }
-                    await this.timeout(15000);
+                    await this.timeout(sleep);
                     isGo = true;
                 }
             }
-        }, 10000);
+        }, sleep);
     }
     timeout(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));

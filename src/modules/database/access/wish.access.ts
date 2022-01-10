@@ -35,8 +35,10 @@ export async function getUnmanagedWishes(): Promise<
   Array<{ id: number; href: string; client_id: ClientTGID }>
 > {
   return await Database.getInstance().manyOrNone(`
-    SELECT id, href, client_id
-    FROM wish
+    SELECT w.id as id, w.href as href, c.tgid as client_id
+    FROM wish w
+    LEFT JOIN client c
+    ON c.id = w.client_id
     WHERE title IS NULL OR price IS NULL;
   `);
 }

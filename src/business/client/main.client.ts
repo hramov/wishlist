@@ -4,6 +4,7 @@ import {
   getOneByChatIDAccess,
   registerAccess,
 } from "../../modules/database/access/client.access";
+import Logger from "../../modules/logger";
 import { ClientDto, ClientID, ClientTGID } from "./types.client";
 
 export default class Client {
@@ -43,6 +44,7 @@ https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
 
     if (candidate == null || candidate.id == null) {
       client = await registerAccess(client);
+      Logger.log("info", `Пользователь ${client.username} успешно зарегистрирован`)
     }
 
     if (lover == null || lover.id == null) {
