@@ -34,7 +34,7 @@ export async function start(
         `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`
       );
     }
-    console.log(
+    Logger.log("info",
       `Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`
     );
   } else {
@@ -87,7 +87,6 @@ export async function getMyWishes(
   msg: TelegramBot.Message
 ) {
   const result = await new Wish(null).getWishesByID(msg.chat.id.toString());
-  console.log(result);
   if (result != null && result.length > 0) {
     result.forEach(async (item) => {
       instance.sendMessage(
@@ -125,7 +124,6 @@ export async function getMyLovers(
   msg: TelegramBot.Message
 ) {
   const result = await new Client().getLoversByChatID(msg.from.id.toString());
-  console.log(result);
   const items:
     | TelegramBot.InlineKeyboardButton[]
     | { text: string; callback_data: string }[][] = [[]];
@@ -210,11 +208,9 @@ export async function createStatLink(
 ) {
   const uuid = await getUUIDByChatID(msg.chat.id);
   if (uuid != null && uuid.uuid) {
-    console.log(uuid.uuid);
     const result = `${process.env.PROTOCOL || "http"}://${
       process.env.APP_HOST || "hramovdev.ru"
     }:${process.env.APP_PORT}/api/wishlist/statistics/${uuid.uuid}`;
-    console.log(result);
     await instance.sendMessage(
       msg.chat.id,
       `

@@ -29,7 +29,7 @@ async function start(instance, msg) {
         if (client && client.id) {
             await instance.sendMessage(msg.from.id, `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`);
         }
-        console.log(`Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`);
+        logger_1.default.log("info", `Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`);
     }
     else {
         await instance.sendMessage(msg.from.id, `Вы уже зарегистрированы! Ваш Chat ID: ${msg.from.id}`);
@@ -63,7 +63,6 @@ async function createWishDialog(instance, msg) {
 exports.createWishDialog = createWishDialog;
 async function getMyWishes(instance, msg) {
     const result = await new main_wish_1.default(null).getWishesByID(msg.chat.id.toString());
-    console.log(result);
     if (result != null && result.length > 0) {
         result.forEach(async (item) => {
             instance.sendMessage(msg.chat.id, `
@@ -94,7 +93,6 @@ ${item.href}
 exports.getMyWishes = getMyWishes;
 async function getMyLovers(instance, msg) {
     const result = await new main_client_1.default().getLoversByChatID(msg.from.id.toString());
-    console.log(result);
     const items = [[]];
     result.forEach((item) => {
         items.push(new Array({
@@ -153,9 +151,7 @@ exports.buyWishDialog = buyWishDialog;
 async function createStatLink(instance, msg) {
     const uuid = await (0, client_access_1.getUUIDByChatID)(msg.chat.id);
     if (uuid != null && uuid.uuid) {
-        console.log(uuid.uuid);
         const result = `${process.env.PROTOCOL || "http"}://${process.env.APP_HOST || "hramovdev.ru"}:${process.env.APP_PORT}/api/wishlist/statistics/${uuid.uuid}`;
-        console.log(result);
         await instance.sendMessage(msg.chat.id, `
 Ваша ссылка на статистику:
 ${result}

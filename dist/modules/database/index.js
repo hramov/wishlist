@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const pg_promise_1 = __importDefault(require("pg-promise"));
 const fs = __importStar(require("fs"));
+const logger_1 = __importDefault(require("../logger"));
 class Database {
     constructor() {
         if (Database.exists)
@@ -53,17 +54,15 @@ class Database {
     }
     static async init() {
         const exists = await Database.conn.oneOrNone(Database.readSql("check_init.sql"));
-        console.log(exists);
         if (!exists) {
             if (Database.exists) {
                 try {
                     const initSQL = Database.readSql("hand_init.sql");
-                    console.log(initSQL);
                     await Database.conn.query(initSQL);
                 }
                 catch (_err) {
-                    console.log(_err);
                     const err = _err;
+                    logger_1.default.log("error", err.message);
                     return {
                         status: false,
                         err: err,

@@ -1,6 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import Client from "../../business/client/main.client";
 import { ClientDto } from "../../business/client/types.client";
+import Logger from "../logger";
 import { buyWishCb, deleteWishCb, showWishCb } from "./cb_handlers";
 import {
   start,
@@ -34,15 +35,9 @@ export default class Telegram {
         case "/info":
           info(this.instance, msg);
           break;
-        case "/bind ":
-          console.log("Bind");
-          break;
         case "\u2728 Создать желание":
           await createWishDialog(this.instance, msg);
           break;
-        // case "\u2714 Отметить подаренное":
-        //   await buyWishDialog(this.instance, msg);
-        //   break;
         case "\u{1F4E6} Посмотреть мои желания":
           await getMyWishes(this.instance, msg);
           break;
@@ -87,8 +82,9 @@ export default class Telegram {
               `У вас уже есть доступ к виш-листу ${lover.username}`
             );
           }
-        } catch (err) {
-          console.log(err);
+        } catch (_err) {
+          const err: Error = _err as Error;
+          Logger.log("error", err.message);
           await this.instance.sendMessage(msg.chat.id, "Ошибка");
         }
       }

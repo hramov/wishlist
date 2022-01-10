@@ -11,7 +11,6 @@ router.get("/", (req, res) => {
     res.sendFile(path_1.default.join(__dirname + '../../../../static/public/html/index.html'));
 });
 router.get("/statistics/:uuid", async (req, res) => {
-    console.log(req.params.uuid);
     res.send(await new main_wish_1.default(null).stats(req.params.uuid));
 });
 exports.default = router;

@@ -10,7 +10,6 @@ router.get("/", (req, res) => {
 });
 
 router.get("/statistics/:uuid", async (req, res) => {
-  console.log(req.params.uuid)
   res.send(await new Wish(null).stats(req.params.uuid));
 });
 

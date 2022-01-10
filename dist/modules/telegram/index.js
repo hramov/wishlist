@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_telegram_bot_api_1 = __importDefault(require("node-telegram-bot-api"));
 const main_client_1 = __importDefault(require("../../business/client/main.client"));
+const logger_1 = __importDefault(require("../logger"));
 const cb_handlers_1 = require("./cb_handlers");
 const handlers_1 = require("./handlers");
 class Telegram {
@@ -27,15 +28,9 @@ class Telegram {
                 case "/info":
                     (0, handlers_1.info)(this.instance, msg);
                     break;
-                case "/bind ":
-                    console.log("Bind");
-                    break;
                 case "\u2728 Создать желание":
                     await (0, handlers_1.createWishDialog)(this.instance, msg);
                     break;
-                // case "\u2714 Отметить подаренное":
-                //   await buyWishDialog(this.instance, msg);
-                //   break;
                 case "\u{1F4E6} Посмотреть мои желания":
                     await (0, handlers_1.getMyWishes)(this.instance, msg);
                     break;
@@ -69,8 +64,9 @@ class Telegram {
                         await this.instance.sendMessage(msg.chat.id, `У вас уже есть доступ к виш-листу ${lover.username}`);
                     }
                 }
-                catch (err) {
-                    console.log(err);
+                catch (_err) {
+                    const err = _err;
+                    logger_1.default.log("error", err.message);
                     await this.instance.sendMessage(msg.chat.id, "Ошибка");
                 }
             }

@@ -3,6 +3,7 @@ import pg from "pg-promise/typescript/pg-subset";
 import * as fs from "fs";
 
 import { DBReply } from "./types";
+import Logger from "../logger";
 
 export default class Database {
   private static exists: boolean = false;
@@ -46,16 +47,14 @@ export default class Database {
     const exists = await Database.conn.oneOrNone(
       Database.readSql("check_init.sql")
     );
-    console.log(exists)
     if (!exists) {
       if (Database.exists) {
         try {
           const initSQL = Database.readSql("hand_init.sql");
-          console.log(initSQL);
           await Database.conn.query(initSQL);
         } catch (_err) {
-          console.log(_err);
           const err: Error = _err as Error;
+          Logger.log("error", err.message);
           return {
             status: false,
             err: err,
