@@ -10,10 +10,6 @@ export default class Server {
 
   public async createServer(): Promise<Error | void> {
     const server = express();
-    const db = await new Database().connect();
-    if (!db.status) {
-      return db.err;
-    }
 
     server.use("/api/wishlist/", router);
     server.use("/", express.static("public"));

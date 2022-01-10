@@ -1,79 +1,25 @@
 import pgPromise from "pg-promise";
 import pg from "pg-promise/typescript/pg-subset";
-import * as fs from "fs";
-
-import { DBReply } from "./types";
 import Logger from "../logger";
 
 export default class Database {
-  private static exists: boolean = false;
-  private static instance: Database = null;
-  private static isInit: boolean = false;
-
-  static pgp = pgPromise({});
-  static conn: pgPromise.IDatabase<Database, pg.IClient> & Database;
-
-  constructor() {
-    if (Database.exists) return Database.instance;
-    Database.instance = this;
-    Database.exists = true;
-  }
-
-  public async connect(): Promise<DBReply> {
-    Database.conn = Database.pgp(
-      `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
-    );
-    try {
-      // await Database.init();
-      return {
-        status: true,
-        err: null,
-      };
-    } catch (_err: unknown) {
-      const err: Error = _err as Error;
-      return {
-        status: false,
-        err: err,
-      };
-    }
-  }
+  private static instance: pgPromise.IDatabase<Database, pg.IClient> & Database;
 
   public static getInstance(): pgPromise.IDatabase<Database, pg.IClient> &
     Database {
-    return Database.conn;
-  }
-
-  private static async init(): Promise<DBReply> {
-    const exists = await Database.conn.oneOrNone(
-      Database.readSql("check_init.sql")
-    );
-    if (!exists) {
-      if (Database.exists) {
-        try {
-          const initSQL = Database.readSql("hand_init.sql");
-          await Database.conn.query(initSQL);
-        } catch (_err) {
-          const err: Error = _err as Error;
-          Logger.log("error", err.message);
-          return {
-            status: false,
-            err: err,
-          };
-        }
-      } else {
-        return {
-          status: false,
-          err: {
-            name: "Database error",
-            message: "No database connected",
-          },
-        };
+    if (!this.instance) {
+      try {
+        const pgp = pgPromise({});
+        this.instance = pgp(
+          `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
+        );
+        Logger.log("info", "Успешно подключился к БД");
+      } catch (err) {
+        Logger.log("error", "Ошибка подключения к БД");
+        Logger.log("error", err as string);
+        process.exit(1);
       }
     }
-    Database.isInit = true;
-  }
-
-  private static readSql(filePath: string): string {
-    return fs.readFileSync(`static/sql/${filePath}`).toString();
+    return this.instance;
   }
 }
