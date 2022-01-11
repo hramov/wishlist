@@ -6,9 +6,3 @@ export type DBReply = {
     status: boolean,
     err: Error | null
 }
-
-export interface IDB {
-    connect(): Promise<void>;
-    getInstance(): pgPromise.IDatabase<Database, pg.IClient> &
-    Database
-}
