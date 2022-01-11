@@ -1,11 +1,10 @@
 import { Router } from "express";
-import Client from "../../business/client/main.client";
 import Wish from "../../business/wish/main.wish";
 import path from 'path';
 
 const router = Router();
 
-router.get("/", (req, res) => {
+router.get("/", (_, res) => {
   res.sendFile(path.join(__dirname + '../../../../static/public/html/index.html'));
 });
 

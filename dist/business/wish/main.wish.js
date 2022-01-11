@@ -8,6 +8,12 @@ class Wish {
     }
     async create(client_id) {
         const result = await (0, wish_access_1.createMinWishAccess)(client_id, this.href);
+        const isAuto = await (0, wish_access_1.isAutoAccess)(new URL(this.href).hostname);
+        if (!isAuto || !isAuto.auto) {
+            return {
+                id: -1,
+            };
+        }
         if (result && result.id)
             return result;
     }

@@ -9,12 +9,15 @@ export async function info(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  await instance.sendMessage(msg.from.id, `
+  await instance.sendMessage(
+    msg.from.id,
+    `
 Привет! Это бот, который помогает в выборе подарков.
 Можно добавить сколько угодно пользователей Telegram, чтобы видеть их виш-листы.
 
 Для начала использования бота и регистрации системы используйте команду /start
-  `);
+  `
+  );
   return null;
 }
 
@@ -34,7 +37,8 @@ export async function start(
         `Вы были успешно зарегистрированы! Ваш Chat ID: ${msg.from.id}`
       );
     }
-    Logger.log("info",
+    Logger.log(
+      "info",
       `Пользователь ${msg.from.first_name} ${msg.from.last_name} успешно зарегистрировался`
     );
   } else {
@@ -57,7 +61,15 @@ export async function createWish(
 ): Promise<Error | null> {
   new Wish(new URL(msg.text).toString())
     .create(msg.chat.id.toString())
-    .then((data) => {
+    .then(async (data) => {
+      if (data.id == -1) {
+        Logger.log(
+          "warning",
+          `Unsupported hostname ${new URL(msg.text).hostname}`
+        );
+        await handParse(instance, msg);
+        return;
+      }
       Logger.log(
         "info",
         `Желание с ID=${data.id} добавлено в очередь на обработку`
@@ -225,5 +237,34 @@ ${result}
     `
 Проблемы с генерацией ссылки...
 `
+  );
+}
+
+export async function handParse(
+  instance: TelegramBot,
+  msg: TelegramBot.Message
+) {
+  await instance.sendMessage(
+    msg.chat.id,
+    `
+В данный момент с этого сайта недоступен автоматический сбор информации. 
+Ввести самостоятельно?
+  `,
+    {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "Да",
+              callback_data: `hand_yes ${new URL(msg.text).toString()}`,
+            },
+            {
+              text: "Нет",
+              callback_data: "hand_no",
+            },
+          ],
+        ],
+      },
+    }
   );
 }

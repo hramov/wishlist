@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.getUnmanagedWishes = exports.createMinWishAccess = exports.createWishAccess = void 0;
+exports.isAutoAccess = exports.getSpendedMoney = exports.buyWish = exports.deleteWishByID = exports.getWishesByID = exports.getUnmanagedWishes = exports.createMinWishAccess = exports.createWishAccess = void 0;
 const __1 = __importDefault(require(".."));
 const client_access_1 = require("./client.access");
 async function createWishAccess(wish) {
@@ -22,11 +22,13 @@ async function createMinWishAccess(client_id, href) {
         INSERT INTO wish (
             client_id,
             href,
-            created_at
+            created_at,
+            hostname
         ) VALUES (
             ${(await (0, client_access_1.getOneByChatIDAccess)(client_id)).id},
             '${href}',
-            current_timestamp
+            current_timestamp,
+            '${new URL(href).hostname}'
         ) RETURNING id;
     `);
 }
@@ -35,9 +37,11 @@ async function getUnmanagedWishes() {
     return await __1.default.getInstance().manyOrNone(`
     SELECT w.id as id, w.href as href, c.tgid as client_id
     FROM wish w
-    LEFT JOIN client c
+    INNER JOIN client c
     ON c.id = w.client_id
-    WHERE title IS NULL OR price IS NULL;
+    INNER JOIN shops s
+    ON w.hostname = s.title
+    WHERE w.title IS NULL OR w.price IS NULL;
   `);
 }
 exports.getUnmanagedWishes = getUnmanagedWishes;
@@ -89,3 +93,11 @@ async function getSpendedMoney(client_uuid) {
     `);
 }
 exports.getSpendedMoney = getSpendedMoney;
+async function isAutoAccess(href) {
+    return await __1.default.getInstance().oneOrNone(`
+    SELECT 1 as auto
+    FROM shops
+    WHERE title = '${href}'
+  `);
+}
+exports.isAutoAccess = isAutoAccess;

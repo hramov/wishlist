@@ -85,7 +85,9 @@ export default class Parser {
     let sleep = 10000;
     setInterval(async () => {
       if (isGo) {
-        const hrefs = await getUnmanagedWishes();
+        const hrefs = (await getUnmanagedWishes()).filter(
+          (href) => new URL(href.href).hostname === "www.ozon.ru"
+        );
         for (let i = 0; i < hrefs.length; i++) {
           try {
             isGo = false;

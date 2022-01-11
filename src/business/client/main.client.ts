@@ -12,24 +12,12 @@ export default class Client {
     return await registerAccess(client);
   }
 
-  getOne(id: ClientID): ClientDto {
-    return null;
-  }
-
   async getOneByChatID(id: ClientTGID): Promise<ClientDto> {
     return await getOneByChatIDAccess(id);
   }
 
   async getLoversByChatID(id: ClientTGID): Promise<ClientDto[]> {
     return await getLoversByChatIDAccess(id);
-  }
-
-  delete(id: ClientID): ClientID {
-    return null;
-  }
-
-  getLover(id: ClientID): ClientDto {
-    return null;
   }
 
   async createLink(tgid: ClientID): Promise<string> {
@@ -44,7 +32,7 @@ https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
 
     if (candidate == null || candidate.id == null) {
       client = await registerAccess(client);
-      Logger.log("info", `Пользователь ${client.username} успешно зарегистрирован`)
+      Logger.log("info", `User ${client.username} successfully registered`)
     }
 
     if (lover == null || lover.id == null) {

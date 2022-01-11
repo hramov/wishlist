@@ -2,7 +2,12 @@ import TelegramBot from "node-telegram-bot-api";
 import Client from "../../business/client/main.client";
 import { ClientDto } from "../../business/client/types.client";
 import Logger from "../logger";
-import { buyWishCb, deleteWishCb, showWishCb } from "./cb_handlers";
+import {
+  buyWishCb,
+  deleteWishCb,
+  handParseCb,
+  showWishCb,
+} from "./cb_handlers";
 import {
   start,
   info,
@@ -103,6 +108,15 @@ export default class Telegram {
         case "show":
           await showWishCb(this.instance, cb);
           break;
+        case "hand_yes":
+          await handParseCb(this.instance, cb);
+          break;
+        case "hand_no":
+          await this.instance.answerCallbackQuery(cb.id);
+          await this.instance.sendMessage(
+            cb.from.id,
+            `В таком случае будет доступна только ссылка`
+          );
       }
     });
   }

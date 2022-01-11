@@ -2,6 +2,7 @@ import { WishDto } from "../../business/wish/types.wish";
 import Ozon from "./sites/ozon.site";
 import { items } from "./conf/selectors.json";
 import { Page } from "puppeteer";
+import Logger from "../logger";
 
 export default class Router {
   constructor(private page: Page) {
@@ -9,7 +10,8 @@ export default class Router {
   }
 
   async route(url: string): Promise<WishDto> {
-    switch (new URL(url).hostname) {
+    const hostname = new URL(url).hostname;
+    switch (hostname) {
       case "www.ozon.ru":
         const result = await Ozon(this.page, items.ozon);
         if (result) {
@@ -18,6 +20,13 @@ export default class Router {
             ...result,
           };
         }
+        break;
+      default: {
+        Logger.log("warning", `Unsupported shop hostname: ${hostname}`);
+        return {
+          href: url,
+        };
+      }
     }
     return null;
   }

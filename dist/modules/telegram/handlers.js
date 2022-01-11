@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createStatLink = exports.buyWishDialog = exports.buyWishHandler = exports.createLink = exports.deleteWish = exports.getMyLovers = exports.getMyWishes = exports.createWishDialog = exports.createWish = exports.start = exports.info = void 0;
+exports.handParse = exports.createStatLink = exports.buyWishDialog = exports.buyWishHandler = exports.createLink = exports.deleteWish = exports.getMyLovers = exports.getMyWishes = exports.createWishDialog = exports.createWish = exports.start = exports.info = void 0;
 const main_client_1 = __importDefault(require("../../business/client/main.client"));
 const main_wish_1 = __importDefault(require("../../business/wish/main.wish"));
 const keyboard_1 = require("./keyboard");
@@ -41,7 +41,12 @@ exports.start = start;
 async function createWish(instance, msg) {
     new main_wish_1.default(new URL(msg.text).toString())
         .create(msg.chat.id.toString())
-        .then((data) => {
+        .then(async (data) => {
+        if (data.id == -1) {
+            logger_1.default.log("warning", `Unsupported hostname ${new URL(msg.text).hostname}`);
+            await handParse(instance, msg);
+            return;
+        }
         logger_1.default.log("info", `Желание с ID=${data.id} добавлено в очередь на обработку`);
         instance.sendMessage(msg.chat.id, "Добавлено в очередь на обработку...");
     });
@@ -163,3 +168,25 @@ ${result}
 `);
 }
 exports.createStatLink = createStatLink;
+async function handParse(instance, msg) {
+    await instance.sendMessage(msg.chat.id, `
+В данный момент с этого сайта недоступен автоматический сбор информации. 
+Ввести самостоятельно?
+  `, {
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    {
+                        text: "Да",
+                        callback_data: `hand_yes ${new URL(msg.text).toString()}`,
+                    },
+                    {
+                        text: "Нет",
+                        callback_data: "hand_no",
+                    },
+                ],
+            ],
+        },
+    });
+}
+exports.handParse = handParse;

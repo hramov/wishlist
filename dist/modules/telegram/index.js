@@ -83,6 +83,12 @@ class Telegram {
                 case "show":
                     await (0, cb_handlers_1.showWishCb)(this.instance, cb);
                     break;
+                case "hand_yes":
+                    await (0, cb_handlers_1.handParseCb)(this.instance, cb);
+                    break;
+                case "hand_no":
+                    await this.instance.answerCallbackQuery(cb.id);
+                    await this.instance.sendMessage(cb.from.id, `В таком случае будет доступна только ссылка`);
             }
         });
     }

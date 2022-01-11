@@ -1,6 +1,6 @@
 import { red, yellow, blue, green } from "cli-color";
 import { LoggerMessage, LoggerType } from "./types";
-import { appendFile, existsSync, mkdirSync, open } from "fs";
+import { appendFile } from "fs";
 
 export default class Logger {
   static log(type: LoggerType, message: LoggerMessage): void {

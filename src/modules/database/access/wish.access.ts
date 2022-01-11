@@ -22,11 +22,13 @@ export async function createMinWishAccess(
         INSERT INTO wish (
             client_id,
             href,
-            created_at
+            created_at,
+            hostname
         ) VALUES (
             ${(await getOneByChatIDAccess(client_id)).id},
             '${href}',
-            current_timestamp
+            current_timestamp,
+            '${new URL(href).hostname}'
         ) RETURNING id;
     `);
 }
@@ -37,9 +39,11 @@ export async function getUnmanagedWishes(): Promise<
   return await Database.getInstance().manyOrNone(`
     SELECT w.id as id, w.href as href, c.tgid as client_id
     FROM wish w
-    LEFT JOIN client c
+    INNER JOIN client c
     ON c.id = w.client_id
-    WHERE title IS NULL OR price IS NULL;
+    INNER JOIN shops s
+    ON w.hostname = s.title
+    WHERE w.title IS NULL OR w.price IS NULL;
   `);
 }
 
@@ -92,4 +96,12 @@ export async function getSpendedMoney(client_uuid: string): Promise<number> {
     GROUP BY t.client_id 
     HAVING t.client_id = (SELECT id FROM client WHERE uuid='${client_uuid}');
     `);
+}
+
+export async function isAutoAccess(href: string): Promise<{auto: number}> {
+  return await Database.getInstance().oneOrNone(`
+    SELECT 1 as auto
+    FROM shops
+    WHERE title = '${href}'
+  `);
 }

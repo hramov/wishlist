@@ -9,20 +9,11 @@ class Client {
     async register(client) {
         return await (0, client_access_1.registerAccess)(client);
     }
-    getOne(id) {
-        return null;
-    }
     async getOneByChatID(id) {
         return await (0, client_access_1.getOneByChatIDAccess)(id);
     }
     async getLoversByChatID(id) {
         return await (0, client_access_1.getLoversByChatIDAccess)(id);
-    }
-    delete(id) {
-        return null;
-    }
-    getLover(id) {
-        return null;
     }
     async createLink(tgid) {
         return `
@@ -34,7 +25,7 @@ https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
         const lover = await (0, client_access_1.getOneByChatIDAccess)(lover_id);
         if (candidate == null || candidate.id == null) {
             client = await (0, client_access_1.registerAccess)(client);
-            logger_1.default.log("info", `Пользователь ${client.username} успешно зарегистрирован`);
+            logger_1.default.log("info", `User ${client.username} successfully registered`);
         }
         if (lover == null || lover.id == null) {
             return false;

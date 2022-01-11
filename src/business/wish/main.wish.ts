@@ -1,23 +1,28 @@
 import {
   buyWish,
   createMinWishAccess,
-  createWishAccess,
   deleteWishByID,
   getSpendedMoney,
   getWishesByID,
+  isAutoAccess,
 } from "../../modules/database/access/wish.access";
-import Parser from "../../modules/parser";
 import { ClientID, ClientTGID } from "../client/types.client";
-import { WishDto, WishID } from "./types.wish";
+import { WishID } from "./types.wish";
 
 export default class Wish {
   constructor(private href: string) {
     this.href = href;
   }
 
-  async create(client_id: ClientTGID): Promise<{id: number}> {
+  async create(client_id: ClientTGID): Promise<{ id: number }> {
     const result = await createMinWishAccess(client_id, this.href);
-    if (result && result.id) return result
+    const isAuto = await isAutoAccess(new URL(this.href).hostname);
+    if (!isAuto || !isAuto.auto) {
+      return {
+        id: -1,
+      };
+    }
+    if (result && result.id) return result;
   }
 
   async getWishesByID(client_id: ClientTGID) {
@@ -28,7 +33,10 @@ export default class Wish {
     return await deleteWishByID(id);
   }
 
-  async markWishAsGifted(wish_id: WishID, client_id: ClientID): Promise<WishID> {
+  async markWishAsGifted(
+    wish_id: WishID,
+    client_id: ClientID
+  ): Promise<WishID> {
     return await buyWish(wish_id, client_id);
   }
 
