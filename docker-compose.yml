@@ -29,7 +29,6 @@ services:
         - "5432:5432"
       environment:
         - POSTGRES_PASSWORD=grafserega1997
-        - POSTGRES_DB=wishlist
         - PG_DATA=/data/postgres
       volumes:
         - postgres:/data/postgres
