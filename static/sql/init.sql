@@ -230,6 +230,41 @@ CREATE TABLE public.client_lover (
 ALTER TABLE public.client_lover OWNER TO database_admin;
 
 --
+-- Name: shops; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.shops (
+    id integer NOT NULL,
+    title character varying(255) NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.shops OWNER TO postgres;
+
+--
+-- Name: shops_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.shops_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.shops_id_seq OWNER TO postgres;
+
+--
+-- Name: shops_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.shops_id_seq OWNED BY public.shops.id;
+
+
+--
 -- Name: trans; Type: TABLE; Schema: public; Owner: database_admin
 --
 
@@ -255,7 +290,8 @@ CREATE TABLE public.wish (
     title character varying(255),
     try integer,
     price numeric,
-    href character varying(255) NOT NULL
+    href character varying(255) NOT NULL,
+    hostname character varying(255) NOT NULL
 );
 
 
@@ -291,6 +327,13 @@ ALTER TABLE ONLY public.client ALTER COLUMN id SET DEFAULT nextval('public.clien
 
 
 --
+-- Name: shops id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shops ALTER COLUMN id SET DEFAULT nextval('public.shops_id_seq'::regclass);
+
+
+--
 -- Name: wish id; Type: DEFAULT; Schema: public; Owner: database_admin
 --
 
@@ -302,6 +345,7 @@ ALTER TABLE ONLY public.wish ALTER COLUMN id SET DEFAULT nextval('public.wish_id
 --
 
 COPY public.client (id, tgid, username, created_at, uuid) FROM stdin;
+19	174055421	Sergey Khramov	2022-01-11 05:48:35.325891+00	bfd62d66-2314-426c-ad3b-d70e23cfe2de
 \.
 
 
@@ -310,6 +354,15 @@ COPY public.client (id, tgid, username, created_at, uuid) FROM stdin;
 --
 
 COPY public.client_lover (client_id, lover_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: shops; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.shops (id, title, created_at) FROM stdin;
+2	www.ozon.ru	2022-01-11 06:33:54.10724+00
 \.
 
 
@@ -325,7 +378,7 @@ COPY public.trans (client_id, wish_id) FROM stdin;
 -- Data for Name: wish; Type: TABLE DATA; Schema: public; Owner: database_admin
 --
 
-COPY public.wish (id, client_id, created_at, bought_at, img_url, is_given, title, try, price, href) FROM stdin;
+COPY public.wish (id, client_id, created_at, bought_at, img_url, is_given, title, try, price, href, hostname) FROM stdin;
 \.
 
 
@@ -333,14 +386,21 @@ COPY public.wish (id, client_id, created_at, bought_at, img_url, is_given, title
 -- Name: client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: database_admin
 --
 
-SELECT pg_catalog.setval('public.client_id_seq', 18, true);
+SELECT pg_catalog.setval('public.client_id_seq', 19, true);
+
+
+--
+-- Name: shops_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.shops_id_seq', 2, true);
 
 
 --
 -- Name: wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: database_admin
 --
 
-SELECT pg_catalog.setval('public.wish_id_seq', 37, true);
+SELECT pg_catalog.setval('public.wish_id_seq', 54, true);
 
 
 --
@@ -349,6 +409,22 @@ SELECT pg_catalog.setval('public.wish_id_seq', 37, true);
 
 ALTER TABLE ONLY public.client
     ADD CONSTRAINT client_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: shops shops_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shops
+    ADD CONSTRAINT shops_id_key UNIQUE (id);
+
+
+--
+-- Name: shops shops_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.shops
+    ADD CONSTRAINT shops_pkey PRIMARY KEY (title);
 
 
 --
