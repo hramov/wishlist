@@ -12,8 +12,8 @@ services:
         - APP_PORT=5000                                                                             
         - DB_HOST=db 
         - DB_PORT=5432
-        - DB_USER=postgres                                                                     
-        - DB_PASSWORD=grafserega1997                                                         
+        - DB_USER=database_admin                                                                     
+        - DB_PASSWORD=$[;\9N4Ub\"dYWC-                                                      
         - DB_NAME=wishlist                                        
         - TOKEN=2057752320:AAFdlHgxrXt5LndoaPHZ9iq4cTXGqNJ4YEk
         - LOGGER_FOLDER=logs
@@ -28,9 +28,6 @@ services:
       ports:
         - "5432:5432"
       environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=grafserega1997 
-        - POSTGRES_DB=wishlist
         - PG_DATA=/data/postgres
       volumes:
         - postgres:/data/postgres

@@ -1,9 +1,118 @@
 --
+-- PostgreSQL database cluster dump
+--
+
+SET default_transaction_read_only = off;
+
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+
+--
+-- Roles
+--
+
+CREATE ROLE database_admin;
+ALTER ROLE database_admin WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:xs5r3Qh/4dOzVVP5XWLn9g==$i+yU4xS4/tvEjpD8sgBvV6EaUISDlArkuxU2Bdwh0mI=:iAFSPJRp97fMMYnTxxIjYss4Atb5AOEpd+ee/hSrvXU=';
+CREATE ROLE wishlist_admin;
+ALTER ROLE wishlist_admin WITH SUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:SGEVp3zG+w0oDUhAR5W+ww==$kLDP51N7qH5vOOerIqVZ8Om/3CzOriG8JaxSNAg4YE4=:h5tJEhBd/++8jhQeZpMURMzQ7uKgyMVOrFmpl3K1xbg=';
+
+
+
+
+
+
+--
+-- Databases
+--
+
+--
+-- Database "template1" dump
+--
+
+\connect template1
+
+--
 -- PostgreSQL database dump
 --
 
 -- Dumped from database version 14.0 (Debian 14.0-1.pgdg110+1)
 -- Dumped by pg_dump version 14.0 (Debian 14.0-1.pgdg110+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- PostgreSQL database dump complete
+--
+
+--
+-- Database "postgres" dump
+--
+
+\connect postgres
+
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 14.0 (Debian 14.0-1.pgdg110+1)
+-- Dumped by pg_dump version 14.0 (Debian 14.0-1.pgdg110+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- PostgreSQL database dump complete
+--
+
+--
+-- Database "wishlist" dump
+--
+
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 14.0 (Debian 14.0-1.pgdg110+1)
+-- Dumped by pg_dump version 14.0 (Debian 14.0-1.pgdg110+1)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Name: wishlist; Type: DATABASE; Schema: -; Owner: database_admin
+--
+
+CREATE DATABASE wishlist WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'en_US.utf8';
+
+
+ALTER DATABASE wishlist OWNER TO database_admin;
+
+\connect wishlist
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -31,7 +140,7 @@ COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UU
 
 
 --
--- Name: bind_lover(character varying, character varying); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: bind_lover(character varying, character varying); Type: FUNCTION; Schema: public; Owner: database_admin
 --
 
 CREATE FUNCTION public.bind_lover(client_id_var character varying, lover_id_var character varying) RETURNS boolean
@@ -65,14 +174,14 @@ CREATE FUNCTION public.bind_lover(client_id_var character varying, lover_id_var 
   $$;
 
 
-ALTER FUNCTION public.bind_lover(client_id_var character varying, lover_id_var character varying) OWNER TO postgres;
+ALTER FUNCTION public.bind_lover(client_id_var character varying, lover_id_var character varying) OWNER TO database_admin;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: client; Type: TABLE; Schema: public; Owner: postgres
+-- Name: client; Type: TABLE; Schema: public; Owner: database_admin
 --
 
 CREATE TABLE public.client (
@@ -84,10 +193,10 @@ CREATE TABLE public.client (
 );
 
 
-ALTER TABLE public.client OWNER TO postgres;
+ALTER TABLE public.client OWNER TO database_admin;
 
 --
--- Name: client_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: client_id_seq; Type: SEQUENCE; Schema: public; Owner: database_admin
 --
 
 CREATE SEQUENCE public.client_id_seq
@@ -99,17 +208,17 @@ CREATE SEQUENCE public.client_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.client_id_seq OWNER TO postgres;
+ALTER TABLE public.client_id_seq OWNER TO database_admin;
 
 --
--- Name: client_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: client_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: database_admin
 --
 
 ALTER SEQUENCE public.client_id_seq OWNED BY public.client.id;
 
 
 --
--- Name: client_lover; Type: TABLE; Schema: public; Owner: postgres
+-- Name: client_lover; Type: TABLE; Schema: public; Owner: database_admin
 --
 
 CREATE TABLE public.client_lover (
@@ -118,47 +227,10 @@ CREATE TABLE public.client_lover (
 );
 
 
-ALTER TABLE public.client_lover OWNER TO postgres;
+ALTER TABLE public.client_lover OWNER TO database_admin;
 
 --
--- Name: min_wish; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.min_wish (
-    id integer NOT NULL,
-    client_id integer,
-    href character varying(255) NOT NULL,
-    created_at timestamp with time zone,
-    managed boolean
-);
-
-
-ALTER TABLE public.min_wish OWNER TO postgres;
-
---
--- Name: min_wish_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.min_wish_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.min_wish_id_seq OWNER TO postgres;
-
---
--- Name: min_wish_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.min_wish_id_seq OWNED BY public.min_wish.id;
-
-
---
--- Name: trans; Type: TABLE; Schema: public; Owner: postgres
+-- Name: trans; Type: TABLE; Schema: public; Owner: database_admin
 --
 
 CREATE TABLE public.trans (
@@ -167,10 +239,10 @@ CREATE TABLE public.trans (
 );
 
 
-ALTER TABLE public.trans OWNER TO postgres;
+ALTER TABLE public.trans OWNER TO database_admin;
 
 --
--- Name: wish; Type: TABLE; Schema: public; Owner: postgres
+-- Name: wish; Type: TABLE; Schema: public; Owner: database_admin
 --
 
 CREATE TABLE public.wish (
@@ -187,10 +259,10 @@ CREATE TABLE public.wish (
 );
 
 
-ALTER TABLE public.wish OWNER TO postgres;
+ALTER TABLE public.wish OWNER TO database_admin;
 
 --
--- Name: wish_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: wish_id_seq; Type: SEQUENCE; Schema: public; Owner: database_admin
 --
 
 CREATE SEQUENCE public.wish_id_seq
@@ -202,38 +274,31 @@ CREATE SEQUENCE public.wish_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.wish_id_seq OWNER TO postgres;
+ALTER TABLE public.wish_id_seq OWNER TO database_admin;
 
 --
--- Name: wish_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: wish_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: database_admin
 --
 
 ALTER SEQUENCE public.wish_id_seq OWNED BY public.wish.id;
 
 
 --
--- Name: client id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: client id; Type: DEFAULT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.client ALTER COLUMN id SET DEFAULT nextval('public.client_id_seq'::regclass);
 
 
 --
--- Name: min_wish id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.min_wish ALTER COLUMN id SET DEFAULT nextval('public.min_wish_id_seq'::regclass);
-
-
---
--- Name: wish id; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: wish id; Type: DEFAULT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.wish ALTER COLUMN id SET DEFAULT nextval('public.wish_id_seq'::regclass);
 
 
 --
--- Data for Name: client; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: client; Type: TABLE DATA; Schema: public; Owner: database_admin
 --
 
 COPY public.client (id, tgid, username, created_at, uuid) FROM stdin;
@@ -241,7 +306,7 @@ COPY public.client (id, tgid, username, created_at, uuid) FROM stdin;
 
 
 --
--- Data for Name: client_lover; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: client_lover; Type: TABLE DATA; Schema: public; Owner: database_admin
 --
 
 COPY public.client_lover (client_id, lover_id) FROM stdin;
@@ -249,15 +314,7 @@ COPY public.client_lover (client_id, lover_id) FROM stdin;
 
 
 --
--- Data for Name: min_wish; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.min_wish (id, client_id, href, created_at, managed) FROM stdin;
-\.
-
-
---
--- Data for Name: trans; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: trans; Type: TABLE DATA; Schema: public; Owner: database_admin
 --
 
 COPY public.trans (client_id, wish_id) FROM stdin;
@@ -265,7 +322,7 @@ COPY public.trans (client_id, wish_id) FROM stdin;
 
 
 --
--- Data for Name: wish; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: wish; Type: TABLE DATA; Schema: public; Owner: database_admin
 --
 
 COPY public.wish (id, client_id, created_at, bought_at, img_url, is_given, title, try, price, href) FROM stdin;
@@ -273,28 +330,21 @@ COPY public.wish (id, client_id, created_at, bought_at, img_url, is_given, title
 
 
 --
--- Name: client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: database_admin
 --
 
-SELECT pg_catalog.setval('public.client_id_seq', 17, true);
-
-
---
--- Name: min_wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.min_wish_id_seq', 2, true);
+SELECT pg_catalog.setval('public.client_id_seq', 18, true);
 
 
 --
--- Name: wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: wish_id_seq; Type: SEQUENCE SET; Schema: public; Owner: database_admin
 --
 
-SELECT pg_catalog.setval('public.wish_id_seq', 34, true);
+SELECT pg_catalog.setval('public.wish_id_seq', 37, true);
 
 
 --
--- Name: client client_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: client client_pkey; Type: CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.client
@@ -302,15 +352,7 @@ ALTER TABLE ONLY public.client
 
 
 --
--- Name: min_wish min_wish_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.min_wish
-    ADD CONSTRAINT min_wish_pkey PRIMARY KEY (id);
-
-
---
--- Name: wish wish_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: wish wish_pkey; Type: CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.wish
@@ -318,7 +360,7 @@ ALTER TABLE ONLY public.wish
 
 
 --
--- Name: client_lover client_lover_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: client_lover client_lover_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.client_lover
@@ -326,7 +368,7 @@ ALTER TABLE ONLY public.client_lover
 
 
 --
--- Name: client_lover client_lover_lover_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: client_lover client_lover_lover_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.client_lover
@@ -334,15 +376,7 @@ ALTER TABLE ONLY public.client_lover
 
 
 --
--- Name: min_wish min_wish_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.min_wish
-    ADD CONSTRAINT min_wish_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.client(id);
-
-
---
--- Name: trans trans_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: trans trans_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.trans
@@ -350,7 +384,7 @@ ALTER TABLE ONLY public.trans
 
 
 --
--- Name: trans trans_wish_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: trans trans_wish_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.trans
@@ -358,7 +392,7 @@ ALTER TABLE ONLY public.trans
 
 
 --
--- Name: wish wish_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: wish wish_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: database_admin
 --
 
 ALTER TABLE ONLY public.wish
@@ -367,5 +401,9 @@ ALTER TABLE ONLY public.wish
 
 --
 -- PostgreSQL database dump complete
+--
+
+--
+-- PostgreSQL database cluster dump complete
 --
 
