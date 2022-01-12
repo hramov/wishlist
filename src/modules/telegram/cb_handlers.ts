@@ -1,4 +1,5 @@
 import TelegramBot from "node-telegram-bot-api";
+import { ValidationError } from "../../business/validation/error";
 import Wish from "../../business/wish/main.wish";
 import {
   createWishAccess,
@@ -72,11 +73,14 @@ export async function handParseCb(
   await instance.answerCallbackQuery(cb.id);
   await instance.sendMessage(cb.from.id, `Введите название:`);
   instance.once("message", async (msg: TelegramBot.Message) => {
-    result.title = msg.text;
+    result.title = msg.text.toString();
     await instance.sendMessage(cb.from.id, `Введите цену:`);
     instance.once("message", async (msg: TelegramBot.Message) => {
       try {
         result.price = parseInt(msg.text);
+        if (Number.isNaN(result.price)) {
+          throw new ValidationError("result.price is NaN");
+        } 
         await createWishAccess(result);
         await instance.sendMessage(
           cb.from.id,

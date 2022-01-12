@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handParseCb = exports.showWishCb = exports.buyWishCb = exports.deleteWishCb = void 0;
+const error_1 = require("../../business/validation/error");
 const main_wish_1 = __importDefault(require("../../business/wish/main.wish"));
 const wish_access_1 = require("../database/access/wish.access");
 const logger_1 = __importDefault(require("../logger"));
@@ -55,11 +56,14 @@ async function handParseCb(instance, cb) {
     await instance.answerCallbackQuery(cb.id);
     await instance.sendMessage(cb.from.id, `Введите название:`);
     instance.once("message", async (msg) => {
-        result.title = msg.text;
+        result.title = msg.text.toString();
         await instance.sendMessage(cb.from.id, `Введите цену:`);
         instance.once("message", async (msg) => {
             try {
                 result.price = parseInt(msg.text);
+                if (Number.isNaN(result.price)) {
+                    throw new error_1.ValidationError("result.price is NaN");
+                }
                 await (0, wish_access_1.createWishAccess)(result);
                 await instance.sendMessage(cb.from.id, `Успешно добавлено желание ${result.href}`);
             }

@@ -5,6 +5,7 @@ import {
   registerAccess,
 } from "../../modules/database/access/client.access";
 import Logger from "../../modules/logger";
+import { isString } from "../validation/validators";
 import { ClientDto, ClientID, ClientTGID } from "./types.client";
 
 export default class Client {
@@ -12,7 +13,7 @@ export default class Client {
     return await registerAccess(client);
   }
 
-  async getOneByChatID(id: ClientTGID): Promise<ClientDto> {
+  async getOneByChatID(@isString id: ClientTGID): Promise<ClientDto> {
     return await getOneByChatIDAccess(id);
   }
 
@@ -20,7 +21,7 @@ export default class Client {
     return await getLoversByChatIDAccess(id);
   }
 
-  async createLink(tgid: ClientID): Promise<string> {
+  async createLink(@isString tgid: ClientID): Promise<string> {
     return `
 Присоединяйся ко мне в Wish List Exchange \u{1F64C} (перейди по ссылке и нажми кнопку START):
 https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;

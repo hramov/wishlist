@@ -27,7 +27,13 @@ export default class Telegram {
 
   public createBot(): TelegramBot {
     this.instance = new TelegramBot(this.token, { polling: true });
-    this.handler();
+    try {
+      this.handler();
+    } catch (_err) {
+      const err: Error = _err as Error;
+      Logger.log("error", err.message);
+    }
+
     return this.instance;
   }
 

@@ -16,7 +16,13 @@ class Telegram {
     }
     createBot() {
         this.instance = new node_telegram_bot_api_1.default(this.token, { polling: true });
-        this.handler();
+        try {
+            this.handler();
+        }
+        catch (_err) {
+            const err = _err;
+            logger_1.default.log("error", err.message);
+        }
         return this.instance;
     }
     handler() {
