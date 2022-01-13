@@ -59,8 +59,8 @@ export async function createWish(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  new Wish(new URL(msg.text).toString())
-    .create(msg.chat.id.toString())
+  new Wish()
+    .create(msg.chat.id.toString(), new URL(msg.text).toString())
     .then(async (data) => {
       if (data.id == -1) {
         Logger.log(
@@ -98,7 +98,7 @@ export async function getMyWishes(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).getWishesByID(msg.chat.id.toString());
+  const result = await new Wish().getWishesByID(msg.chat.id.toString());
   if (result != null && result.length > 0) {
     result.forEach(async (item) => {
       instance.sendMessage(
@@ -164,7 +164,7 @@ export async function deleteWish(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).deleteWish(Number(msg.text));
+  const result = await new Wish().deleteWish(Number(msg.text));
   if (result != null) {
     await instance.sendMessage(
       msg.chat.id,
@@ -189,10 +189,7 @@ export async function buyWishHandler(
   msg: TelegramBot.Message
 ) {
   try {
-    const result = new Wish(null).markWishAsGifted(
-      Number(msg.text),
-      msg.chat.id
-    );
+    const result = new Wish().markWishAsGifted(Number(msg.text), msg.chat.id);
     if (result) {
       await instance.sendMessage(msg.chat.id, "Успешно отмечено");
       return;
