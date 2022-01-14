@@ -3,28 +3,20 @@ import { WishDto } from "../../business/wish/types.wish";
 import Router from "./router";
 import { userAgents } from "./conf/default.json";
 import { ClientTGID } from "../../business/client/types.client";
-import {
-  createWishAccess,
-  getUnmanagedWishes,
-} from "../database/access/wish.access";
+import WishAccess from "../database/access/wish.access";
 import Logger from "../logger";
 import TelegramBot from "node-telegram-bot-api";
+import { Singleton } from "../../business/decorators/singletone";
+import { UnmanagedWish } from "../database/types";
 
+@Singleton
 export default class Parser {
   private browser: Browser = null;
   private isStarted: boolean = false;
   private pages: number = 0;
 
-  private static exists: boolean = false;
-  private static instance: Parser = null;
-
-  constructor(private options: any) {
-    if (!Parser.exists) {
-      this.options = options;
-      Parser.exists = true;
-      Parser.instance = this;
-    }
-    return Parser.instance;
+  constructor(private readonly options: any) {
+    this.options = options;
   }
 
   async create(): Promise<Browser> {
@@ -76,8 +68,6 @@ export default class Parser {
   async destroy() {
     await this.browser.close();
     this.isStarted = false;
-    Parser.exists = false;
-    Parser.instance = null;
   }
 
   async demon(instance: TelegramBot) {
@@ -85,15 +75,15 @@ export default class Parser {
     let sleep = 10000;
     setInterval(async () => {
       if (isGo) {
-        const hrefs = (await getUnmanagedWishes()).filter(
-          (href) => new URL(href.href).hostname === "www.ozon.ru"
+        const hrefs = (await new WishAccess().getUnmanagedWishes()).filter(
+          (href: UnmanagedWish) => new URL(href.href).hostname === "www.ozon.ru"
         );
         for (let i = 0; i < hrefs.length; i++) {
           try {
             isGo = false;
             const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
             if (wish == null) sleep *= 2;
-            await createWishAccess(wish);
+            await new WishAccess().createWishAccess(wish);
             Logger.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
             await instance.sendMessage(
               hrefs[i].client_id,

@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import Server from "./modules/server";
 import Telegram from "./modules/telegram";
 

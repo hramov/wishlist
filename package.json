@@ -4,7 +4,7 @@
   "description": "Telegram bot keeping track of your wished",
   "main": "app.js",
   "scripts": {
-    "dev": "tsc && node ./dist/app.js",
+    "dev": "nodemon ./src/app.ts",
     "build": "tsc"
   },
   "repository": {
@@ -33,6 +33,11 @@
     "node-html-parser": "^5.2.0",
     "node-telegram-bot-api": "^0.56.0",
     "pg-promise": "^10.11.1",
-    "puppeteer": "^13.0.1"
+    "puppeteer": "^13.0.1",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0"
   }
 }

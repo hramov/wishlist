@@ -2,7 +2,7 @@ import TelegramBot from "node-telegram-bot-api";
 import Client from "../../business/client/main.client";
 import Wish from "../../business/wish/main.wish";
 import { startKeyboard } from "./keyboard";
-import { getUUIDByChatID } from "../database/access/client.access";
+import ClientAccess from "../database/access/client.access";
 import Logger from "../logger";
 
 export async function info(
@@ -215,7 +215,7 @@ export async function createStatLink(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const uuid = await getUUIDByChatID(msg.chat.id);
+  const uuid = await new ClientAccess().getUUIDByChatID(msg.chat.id);
   if (uuid != null && uuid.uuid) {
     const result = `${process.env.PROTOCOL || "http"}://${
       process.env.APP_HOST || "hramovdev.ru"

@@ -1,5 +1,3 @@
-import "reflect-metadata";
-
 export const SINGLETON_KEY = Symbol();
 
 export type Singleton<T extends new (...args: any[]) => any> = T & {

@@ -2,12 +2,12 @@ import Database from "..";
 import { ClientID, ClientTGID } from "../../../business/client/types.client";
 import { Singleton } from "../../../business/decorators/singletone";
 import { WishDto, WishID } from "../../../business/wish/types.wish";
-import { DbInstance } from "../types";
-import { getOneByChatIDAccess } from "./client.access";
+import { DbInstance, UnmanagedWish } from "../types";
+import ClientAccess from "./client.access";
 
 @Singleton
 export default class WishAccess {
-  constructor(private readonly db: DbInstance = Database.getInstance()) {}
+  constructor(private readonly db: DbInstance<Database> = Database.getInstance()) {}
 
   async createWishAccess(wish: WishDto) {
     return await this.db.oneOrNone(`
@@ -31,7 +31,7 @@ export default class WishAccess {
               created_at,
               hostname
           ) VALUES (
-              ${(await getOneByChatIDAccess(client_id)).id},
+              ${(await new ClientAccess().getOneByChatIDAccess(client_id)).id},
               '${href}',
               current_timestamp,
               '${new URL(href).hostname}'
@@ -40,7 +40,7 @@ export default class WishAccess {
   }
 
   async getUnmanagedWishes(): Promise<
-    Array<{ id: number; href: string; client_id: ClientTGID }>
+    Array<UnmanagedWish>
   > {
     return await this.db.manyOrNone(`
       SELECT w.id as id, w.href as href, c.tgid as client_id

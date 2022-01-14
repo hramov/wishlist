@@ -1,7 +1,9 @@
 import express from "express";
+import { Singleton } from "../../business/decorators/singletone";
 import Logger from "../logger";
 import router from "./router";
 
+@Singleton
 export default class Server {
   constructor(private port: number) {
     this.port = port;

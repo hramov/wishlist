@@ -4,9 +4,15 @@ import {
   ClientID,
   ClientTGID,
 } from "../../../business/client/types.client";
+import { DbInstance } from "../types";
 
-export async function registerAccess(client: ClientDto): Promise<ClientDto> {
-  return await Database.getInstance().oneOrNone(`
+export default class ClientAccess {
+  constructor(
+    private readonly db: DbInstance<Database> = Database.getInstance()
+  ) {}
+
+  async registerAccess(client: ClientDto): Promise<ClientDto> {
+    return await this.db.oneOrNone(`
         INSERT INTO client (
             tgid,
             username,
@@ -17,29 +23,27 @@ export async function registerAccess(client: ClientDto): Promise<ClientDto> {
             current_timestamp
         ) RETURNING id, tgid, username;
     `);
-}
+  }
 
-export async function getOneByChatIDAccess(id: ClientTGID): Promise<ClientDto> {
-  return await Database.getInstance().oneOrNone(`
+  async getOneByChatIDAccess(id: ClientTGID): Promise<ClientDto> {
+    return await this.db.oneOrNone(`
         SELECT * 
         FROM client 
         WHERE tgid = '${id}';
     `);
-}
+  }
 
-export async function getIsLoverAccess(client_id: ClientTGID, lover_id: ClientTGID) {
-  return await Database.getInstance().oneOrNone(`
+  async getIsLoverAccess(client_id: ClientTGID, lover_id: ClientTGID) {
+    return await this.db.oneOrNone(`
     SELECT *
     FROM client_lover
     WHERE client_id = '${client_id}'
     AND lover_id = '${lover_id}'
-  `)
-}
+  `);
+  }
 
-export async function getLoversByChatIDAccess(
-  tgid: ClientTGID
-): Promise<ClientDto[]> {
-  return await Database.getInstance().manyOrNone(`
+  async getLoversByChatIDAccess(tgid: ClientTGID): Promise<ClientDto[]> {
+    return await this.db.manyOrNone(`
         SELECT c.id, c.tgid, c.username, c.uuid
         FROM client_lover cl
         LEFT JOIN client c
@@ -50,18 +54,22 @@ export async function getLoversByChatIDAccess(
           WHERE tgid = '${tgid}'
         )
     `);
-}
+  }
 
-export async function bindLoverAccess(client_id: ClientTGID, lover_id: ClientTGID): Promise<{result: boolean}> {
-  return await Database.getInstance().oneOrNone(`
+  async bindLoverAccess(
+    client_id: ClientTGID,
+    lover_id: ClientTGID
+  ): Promise<{ result: boolean }> {
+    return await this.db.oneOrNone(`
     SELECT * FROM bind_lover('${client_id}', '${lover_id}') as result;
   `);
-}
+  }
 
-export async function getUUIDByChatID(client_id: ClientID) {
-  return await Database.getInstance().oneOrNone(`
+  async getUUIDByChatID(client_id: ClientID) {
+    return await this.db.oneOrNone(`
     SELECT uuid
     FROM client
     WHERE tgid = '${client_id}';
   `);
+  }
 }

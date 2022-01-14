@@ -1,6 +1,6 @@
 import pgPromise from "pg-promise"
 import pg from "pg-promise/typescript/pg-subset"
-import Database from "."
+import { ClientTGID } from "../../business/client/types.client"
 
 export type DBReply = {
     status: boolean,
@@ -8,3 +8,9 @@ export type DBReply = {
 }
 
 export type DbInstance<T> = pgPromise.IDatabase<T, pg.IClient> & T
+
+export type UnmanagedWish = { 
+    id: number; 
+    href: string; 
+    client_id: ClientTGID 
+}
