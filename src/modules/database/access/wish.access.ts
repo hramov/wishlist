@@ -107,5 +107,5 @@ export default class WishAccess {
       FROM shops
       WHERE title = '${href}'
     `);
-  }
+}
 }

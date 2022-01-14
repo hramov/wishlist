@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = __importDefault(require(".."));
+
 const singletone_1 = require("../../../business/decorators/singletone");
 const client_access_1 = __importDefault(require("./client.access"));
 let WishAccess = class WishAccess {
@@ -21,7 +22,6 @@ let WishAccess = class WishAccess {
     }
     async createWishAccess(wish) {
         return await this.db.oneOrNone(`
-  
           UPDATE wish
           SET title = '${wish.title}',
               price = '${wish.price}',
