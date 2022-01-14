@@ -1,4 +1,13 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -6,20 +15,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const puppeteer_1 = __importDefault(require("puppeteer"));
 const router_1 = __importDefault(require("./router"));
 const default_json_1 = require("./conf/default.json");
-const wish_access_1 = require("../database/access/wish.access");
+const wish_access_1 = __importDefault(require("../database/access/wish.access"));
 const logger_1 = __importDefault(require("../logger"));
-class Parser {
+const singletone_1 = require("../../business/decorators/singletone");
+let Parser = class Parser {
     constructor(options) {
         this.options = options;
         this.browser = null;
         this.isStarted = false;
         this.pages = 0;
-        if (!Parser.exists) {
-            this.options = options;
-            Parser.exists = true;
-            Parser.instance = this;
-        }
-        return Parser.instance;
+        this.options = options;
     }
     async create() {
         if (!this.isStarted) {
@@ -64,22 +69,20 @@ class Parser {
     async destroy() {
         await this.browser.close();
         this.isStarted = false;
-        Parser.exists = false;
-        Parser.instance = null;
     }
     async demon(instance) {
         let isGo = true;
         let sleep = 10000;
         setInterval(async () => {
             if (isGo) {
-                const hrefs = (await (0, wish_access_1.getUnmanagedWishes)()).filter((href) => new URL(href.href).hostname === "www.ozon.ru");
+                const hrefs = (await new wish_access_1.default().getUnmanagedWishes()).filter((href) => new URL(href.href).hostname === "www.ozon.ru");
                 for (let i = 0; i < hrefs.length; i++) {
                     try {
                         isGo = false;
                         const wish = await this.parse(hrefs[i].href, hrefs[i].client_id);
                         if (wish == null)
                             sleep *= 2;
-                        await (0, wish_access_1.createWishAccess)(wish);
+                        await new wish_access_1.default().createWishAccess(wish);
                         logger_1.default.log("info", `Успешно обработал запрос: ${hrefs[i].href}`);
                         await instance.sendMessage(hrefs[i].client_id, `Успешно обработал запрос: ${hrefs[i].href}`);
                         sleep /= 2;
@@ -98,7 +101,9 @@ class Parser {
     timeout(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
-}
+};
+Parser = __decorate([
+    singletone_1.Singleton,
+    __metadata("design:paramtypes", [Object])
+], Parser);
 exports.default = Parser;
-Parser.exists = false;
-Parser.instance = null;

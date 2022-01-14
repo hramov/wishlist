@@ -15,18 +15,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_access_1 = require("../../modules/database/access/client.access");
+const client_access_1 = __importDefault(require("../../modules/database/access/client.access"));
 const logger_1 = __importDefault(require("../../modules/logger"));
+const singletone_1 = require("../decorators/singletone");
 const validators_1 = require("../validation/validators");
-class Client {
+let Client = class Client {
+    constructor(access = new client_access_1.default()) {
+        this.access = access;
+    }
     async register(client) {
-        return await (0, client_access_1.registerAccess)(client);
+        return await this.access.registerAccess(client);
     }
     async getOneByChatID(id) {
-        return await (0, client_access_1.getOneByChatIDAccess)(id);
+        return await this.access.getOneByChatIDAccess(id);
     }
     async getLoversByChatID(id) {
-        return await (0, client_access_1.getLoversByChatIDAccess)(id);
+        return await this.access.getLoversByChatIDAccess(id);
     }
     async createLink(tgid) {
         return `
@@ -34,18 +38,18 @@ class Client {
 https://t.me/${process.env.BOT_NAME || "hramovdevbot"}?start=${tgid}`;
     }
     async bindLover(client, lover_id) {
-        const candidate = await (0, client_access_1.getOneByChatIDAccess)(client.tgid);
-        const lover = await (0, client_access_1.getOneByChatIDAccess)(lover_id);
+        const candidate = await this.access.getOneByChatIDAccess(client.tgid);
+        const lover = await this.access.getOneByChatIDAccess(lover_id);
         if (candidate == null || candidate.id == null) {
-            client = await (0, client_access_1.registerAccess)(client);
+            client = await this.access.registerAccess(client);
             logger_1.default.log("info", `User ${client.username} successfully registered`);
         }
         if (lover == null || lover.id == null) {
             return false;
         }
-        return (await (0, client_access_1.bindLoverAccess)(client.tgid, lover_id)).result;
+        return (await this.access.bindLoverAccess(client.tgid, lover_id)).result;
     }
-}
+};
 __decorate([
     __param(0, validators_1.isString),
     __metadata("design:type", Function),
@@ -58,4 +62,8 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], Client.prototype, "createLink", null);
+Client = __decorate([
+    singletone_1.Singleton,
+    __metadata("design:paramtypes", [Object])
+], Client);
 exports.default = Client;

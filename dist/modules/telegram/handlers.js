@@ -7,7 +7,7 @@ exports.handParse = exports.createStatLink = exports.buyWishDialog = exports.buy
 const main_client_1 = __importDefault(require("../../business/client/main.client"));
 const main_wish_1 = __importDefault(require("../../business/wish/main.wish"));
 const keyboard_1 = require("./keyboard");
-const client_access_1 = require("../database/access/client.access");
+const client_access_1 = __importDefault(require("../database/access/client.access"));
 const logger_1 = __importDefault(require("../logger"));
 async function info(instance, msg) {
     await instance.sendMessage(msg.from.id, `
@@ -39,8 +39,8 @@ async function start(instance, msg) {
 }
 exports.start = start;
 async function createWish(instance, msg) {
-    new main_wish_1.default(new URL(msg.text).toString())
-        .create(msg.chat.id.toString())
+    new main_wish_1.default()
+        .create(msg.chat.id.toString(), new URL(msg.text).toString())
         .then(async (data) => {
         if (data.id == -1) {
             logger_1.default.log("warning", `Unsupported hostname ${new URL(msg.text).hostname}`);
@@ -67,7 +67,7 @@ async function createWishDialog(instance, msg) {
 }
 exports.createWishDialog = createWishDialog;
 async function getMyWishes(instance, msg) {
-    const result = await new main_wish_1.default(null).getWishesByID(msg.chat.id.toString());
+    const result = await new main_wish_1.default().getWishesByID(msg.chat.id.toString());
     if (result != null && result.length > 0) {
         result.forEach(async (item) => {
             instance.sendMessage(msg.chat.id, `
@@ -117,7 +117,7 @@ async function getMyLovers(instance, msg) {
 }
 exports.getMyLovers = getMyLovers;
 async function deleteWish(instance, msg) {
-    const result = await new main_wish_1.default(null).deleteWish(Number(msg.text));
+    const result = await new main_wish_1.default().deleteWish(Number(msg.text));
     if (result != null) {
         await instance.sendMessage(msg.chat.id, `Желание с ID ${Number(msg.text)} успешно удалено`);
         return;
@@ -133,7 +133,7 @@ async function createLink(instance, msg) {
 exports.createLink = createLink;
 async function buyWishHandler(instance, msg) {
     try {
-        const result = new main_wish_1.default(null).markWishAsGifted(Number(msg.text), msg.chat.id);
+        const result = new main_wish_1.default().markWishAsGifted(Number(msg.text), msg.chat.id);
         if (result) {
             await instance.sendMessage(msg.chat.id, "Успешно отмечено");
             return;
@@ -154,7 +154,7 @@ async function buyWishDialog(instance, msg) {
 }
 exports.buyWishDialog = buyWishDialog;
 async function createStatLink(instance, msg) {
-    const uuid = await (0, client_access_1.getUUIDByChatID)(msg.chat.id);
+    const uuid = await new client_access_1.default().getUUIDByChatID(msg.chat.id);
     if (uuid != null && uuid.uuid) {
         const result = `${process.env.PROTOCOL || "http"}://${process.env.APP_HOST || "hramovdev.ru"}:${process.env.APP_PORT}/api/wishlist/statistics/${uuid.uuid}`;
         await instance.sendMessage(msg.chat.id, `

@@ -3,10 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUUIDByChatID = exports.bindLoverAccess = exports.getLoversByChatIDAccess = exports.getIsLoverAccess = exports.getOneByChatIDAccess = exports.registerAccess = void 0;
 const __1 = __importDefault(require(".."));
-async function registerAccess(client) {
-    return await __1.default.getInstance().oneOrNone(`
+class ClientAccess {
+    constructor(db = __1.default.getInstance()) {
+        this.db = db;
+    }
+    async registerAccess(client) {
+        return await this.db.oneOrNone(`
         INSERT INTO client (
             tgid,
             username,
@@ -17,27 +20,24 @@ async function registerAccess(client) {
             current_timestamp
         ) RETURNING id, tgid, username;
     `);
-}
-exports.registerAccess = registerAccess;
-async function getOneByChatIDAccess(id) {
-    return await __1.default.getInstance().oneOrNone(`
+    }
+    async getOneByChatIDAccess(id) {
+        return await this.db.oneOrNone(`
         SELECT * 
         FROM client 
         WHERE tgid = '${id}';
     `);
-}
-exports.getOneByChatIDAccess = getOneByChatIDAccess;
-async function getIsLoverAccess(client_id, lover_id) {
-    return await __1.default.getInstance().oneOrNone(`
+    }
+    async getIsLoverAccess(client_id, lover_id) {
+        return await this.db.oneOrNone(`
     SELECT *
     FROM client_lover
     WHERE client_id = '${client_id}'
     AND lover_id = '${lover_id}'
   `);
-}
-exports.getIsLoverAccess = getIsLoverAccess;
-async function getLoversByChatIDAccess(tgid) {
-    return await __1.default.getInstance().manyOrNone(`
+    }
+    async getLoversByChatIDAccess(tgid) {
+        return await this.db.manyOrNone(`
         SELECT c.id, c.tgid, c.username, c.uuid
         FROM client_lover cl
         LEFT JOIN client c
@@ -48,19 +48,18 @@ async function getLoversByChatIDAccess(tgid) {
           WHERE tgid = '${tgid}'
         )
     `);
-}
-exports.getLoversByChatIDAccess = getLoversByChatIDAccess;
-async function bindLoverAccess(client_id, lover_id) {
-    return await __1.default.getInstance().oneOrNone(`
+    }
+    async bindLoverAccess(client_id, lover_id) {
+        return await this.db.oneOrNone(`
     SELECT * FROM bind_lover('${client_id}', '${lover_id}') as result;
   `);
-}
-exports.bindLoverAccess = bindLoverAccess;
-async function getUUIDByChatID(client_id) {
-    return await __1.default.getInstance().oneOrNone(`
+    }
+    async getUUIDByChatID(client_id) {
+        return await this.db.oneOrNone(`
     SELECT uuid
     FROM client
     WHERE tgid = '${client_id}';
   `);
+    }
 }
-exports.getUUIDByChatID = getUUIDByChatID;
+exports.default = ClientAccess;
