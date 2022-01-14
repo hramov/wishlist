@@ -1,10 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import { ValidationError } from "../../business/validation/error";
 import Wish from "../../business/wish/main.wish";
-import {
-  createWishAccess,
-  deleteWishByID,
-} from "../database/access/wish.access";
+import WishAccess from "../database/access/wish.access";
 import Logger from "../logger";
 
 export async function deleteWishCb(
@@ -12,7 +9,7 @@ export async function deleteWishCb(
   cb: TelegramBot.CallbackQuery
 ) {
   await instance.answerCallbackQuery(cb.id);
-  const result = await deleteWishByID(Number(cb.data.split(" ")[1]));
+  const result = await new WishAccess().deleteWishByID(Number(cb.data.split(" ")[1]));
   if (result != null) {
     await instance.deleteMessage(cb.from.id, cb.message.message_id.toString());
     await instance.sendMessage(cb.from.id, `Желание успешно удалено`);
@@ -81,7 +78,7 @@ export async function handParseCb(
         if (Number.isNaN(result.price)) {
           throw new ValidationError("result.price is NaN");
         } 
-        await createWishAccess(result);
+        await new WishAccess().createWishAccess(result);
         await instance.sendMessage(
           cb.from.id,
           `Успешно добавлено желание ${result.href}`

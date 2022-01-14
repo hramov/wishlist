@@ -2,7 +2,7 @@ import TelegramBot from "node-telegram-bot-api";
 import Client from "../../business/client/main.client";
 import Wish from "../../business/wish/main.wish";
 import { startKeyboard } from "./keyboard";
-import { getUUIDByChatID } from "../database/access/client.access";
+import ClientAccess from "../database/access/client.access";
 import Logger from "../logger";
 
 export async function info(
@@ -59,8 +59,8 @@ export async function createWish(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ): Promise<Error | null> {
-  new Wish(new URL(msg.text).toString())
-    .create(msg.chat.id.toString())
+  new Wish()
+    .create(msg.chat.id.toString(), new URL(msg.text).toString())
     .then(async (data) => {
       if (data.id == -1) {
         Logger.log(
@@ -98,7 +98,7 @@ export async function getMyWishes(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).getWishesByID(msg.chat.id.toString());
+  const result = await new Wish().getWishesByID(msg.chat.id.toString());
   if (result != null && result.length > 0) {
     result.forEach(async (item) => {
       instance.sendMessage(
@@ -164,7 +164,7 @@ export async function deleteWish(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const result = await new Wish(null).deleteWish(Number(msg.text));
+  const result = await new Wish().deleteWish(Number(msg.text));
   if (result != null) {
     await instance.sendMessage(
       msg.chat.id,
@@ -189,10 +189,7 @@ export async function buyWishHandler(
   msg: TelegramBot.Message
 ) {
   try {
-    const result = new Wish(null).markWishAsGifted(
-      Number(msg.text),
-      msg.chat.id
-    );
+    const result = new Wish().markWishAsGifted(Number(msg.text), msg.chat.id);
     if (result) {
       await instance.sendMessage(msg.chat.id, "Успешно отмечено");
       return;
@@ -218,7 +215,7 @@ export async function createStatLink(
   instance: TelegramBot,
   msg: TelegramBot.Message
 ) {
-  const uuid = await getUUIDByChatID(msg.chat.id);
+  const uuid = await new ClientAccess().getUUIDByChatID(msg.chat.id);
   if (uuid != null && uuid.uuid) {
     const result = `${process.env.PROTOCOL || "http"}://${
       process.env.APP_HOST || "hramovdev.ru"
