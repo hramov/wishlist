@@ -8,7 +8,6 @@ const __1 = __importDefault(require(".."));
 const client_access_1 = require("./client.access");
 async function createWishAccess(wish) {
     return await __1.default.getInstance().oneOrNone(`
-
         UPDATE wish
         SET title = '${wish.title}',
             price = '${wish.price}',

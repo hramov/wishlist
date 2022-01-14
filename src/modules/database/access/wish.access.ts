@@ -5,7 +5,6 @@ import { getOneByChatIDAccess } from "./client.access";
 
 export async function createWishAccess(wish: WishDto) {
   return await Database.getInstance().oneOrNone(`
-
         UPDATE wish
         SET title = '${wish.title}',
             price = '${wish.price}',
@@ -98,7 +97,7 @@ export async function getSpendedMoney(client_uuid: string): Promise<number> {
     `);
 }
 
-export async function isAutoAccess(href: string): Promise<{auto: number}> {
+export async function isAutoAccess(href: string): Promise<{ auto: number }> {
   return await Database.getInstance().oneOrNone(`
     SELECT 1 as auto
     FROM shops
