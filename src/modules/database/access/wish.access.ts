@@ -7,7 +7,9 @@ import ClientAccess from "./client.access";
 
 @Singleton
 export default class WishAccess {
-  constructor(private readonly db: DbInstance<Database> = Database.getInstance()) {}
+  constructor(
+    private readonly db: DbInstance<Database> = Database.getInstance()
+  ) {}
 
   async createWishAccess(wish: WishDto) {
     return await this.db.oneOrNone(`
@@ -39,9 +41,7 @@ export default class WishAccess {
       `);
   }
 
-  async getUnmanagedWishes(): Promise<
-    Array<UnmanagedWish>
-  > {
+  async getUnmanagedWishes(): Promise<Array<UnmanagedWish>> {
     return await this.db.manyOrNone(`
       SELECT w.id as id, w.href as href, c.tgid as client_id
       FROM wish w
@@ -59,6 +59,14 @@ export default class WishAccess {
           FROM wish
           WHERE client_id = (SELECT id FROM client WHERE tgid = '${id}')
           AND bought_at is null;
+      `);
+  }
+
+  async getWishByID(wish_id: number): Promise<WishDto> {
+    return await this.db.oneOrNone(`
+          SELECT href
+          FROM wish
+          WHERE id = ${wish_id};
       `);
   }
 
@@ -107,5 +115,5 @@ export default class WishAccess {
       FROM shops
       WHERE title = '${href}'
     `);
-}
+  }
 }

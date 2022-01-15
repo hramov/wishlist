@@ -61,27 +61,22 @@ export async function handParseCb(
   instance: TelegramBot,
   cb: TelegramBot.CallbackQuery
 ) {
-  const result = {
-    href: cb.data.split(" ")[1].toString(),
-    title: "",
-    price: 0,
-  };
-
+  const wish = await new Wish().getWishByID(Number(cb.data.split(" ")[1]))
   await instance.answerCallbackQuery(cb.id);
   await instance.sendMessage(cb.from.id, `Введите название:`);
   instance.once("message", async (msg: TelegramBot.Message) => {
-    result.title = msg.text.toString();
+    wish.title = msg.text.toString();
     await instance.sendMessage(cb.from.id, `Введите цену:`);
     instance.once("message", async (msg: TelegramBot.Message) => {
       try {
-        result.price = parseInt(msg.text);
-        if (Number.isNaN(result.price)) {
+        wish.price = parseInt(msg.text);
+        if (Number.isNaN(wish.price)) {
           throw new ValidationError("result.price is NaN");
         } 
-        await new WishAccess().createWishAccess(result);
+        await new WishAccess().createWishAccess(wish);
         await instance.sendMessage(
           cb.from.id,
-          `Успешно добавлено желание ${result.href}`
+          `Успешно добавлено желание ${wish.href}`
         );
       } catch (_err) {
         const err: Error = _err as Error;

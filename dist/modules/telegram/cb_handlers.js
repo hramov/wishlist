@@ -48,24 +48,20 @@ ${wish.href}
 }
 exports.showWishCb = showWishCb;
 async function handParseCb(instance, cb) {
-    const result = {
-        href: cb.data.split(" ")[1].toString(),
-        title: "",
-        price: 0,
-    };
+    const wish = await new main_wish_1.default().getWishByID(Number(cb.data.split(" ")[1]));
     await instance.answerCallbackQuery(cb.id);
     await instance.sendMessage(cb.from.id, `Введите название:`);
     instance.once("message", async (msg) => {
-        result.title = msg.text.toString();
+        wish.title = msg.text.toString();
         await instance.sendMessage(cb.from.id, `Введите цену:`);
         instance.once("message", async (msg) => {
             try {
-                result.price = parseInt(msg.text);
-                if (Number.isNaN(result.price)) {
+                wish.price = parseInt(msg.text);
+                if (Number.isNaN(wish.price)) {
                     throw new error_1.ValidationError("result.price is NaN");
                 }
-                await new wish_access_1.default().createWishAccess(result);
-                await instance.sendMessage(cb.from.id, `Успешно добавлено желание ${result.href}`);
+                await new wish_access_1.default().createWishAccess(wish);
+                await instance.sendMessage(cb.from.id, `Успешно добавлено желание ${wish.href}`);
             }
             catch (_err) {
                 const err = _err;

@@ -1,25 +1,44 @@
 import WishAccess from "../../modules/database/access/wish.access";
+import Logger from "../../modules/logger";
 import { ClientID, ClientTGID } from "../client/types.client";
 import { Singleton } from "../decorators/singletone";
-import { WishID } from "./types.wish";
+import { WishDto, WishID } from "./types.wish";
 
 @Singleton
 export default class Wish {
   constructor(private readonly access = new WishAccess()) {}
 
-  async create(client_id: ClientTGID, href: string): Promise<{ id: number }> {
+  async create(
+    client_id: ClientTGID,
+    href: string
+  ): Promise<{ id: number; isAuto: boolean }> {
     const result = await this.access.createMinWishAccess(client_id, href);
-    const isAuto = await this.access.isAutoAccess(new URL(href).hostname);
-    if (!isAuto || !isAuto.auto) {
+    if (result && result.id) {
+      Logger.log(
+        "info",
+        `Wish with id ${result.id} successfully added to database`
+      );
+      const isAuto = await this.access.isAutoAccess(new URL(href).hostname);
+
+      if (!isAuto || !isAuto.auto) {
+        return {
+          ...result,
+          isAuto: false,
+        };
+      }
       return {
-        id: -1,
+        ...result,
+        isAuto: true,
       };
     }
-    if (result && result.id) return result;
   }
 
   async getWishesByID(client_id: ClientTGID) {
     return await this.access.getWishesByID(client_id);
+  }
+
+  async getWishByID(wish_id: number): Promise<WishDto> {
+    return await this.access.getWishByID(wish_id);
   }
 
   async deleteWish(id: WishID): Promise<WishID> {

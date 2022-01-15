@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const wish_access_1 = __importDefault(require("../../modules/database/access/wish.access"));
+const logger_1 = __importDefault(require("../../modules/logger"));
 const singletone_1 = require("../decorators/singletone");
 let Wish = class Wish {
     constructor(access = new wish_access_1.default()) {
@@ -20,17 +21,20 @@ let Wish = class Wish {
     }
     async create(client_id, href) {
         const result = await this.access.createMinWishAccess(client_id, href);
-        const isAuto = await this.access.isAutoAccess(new URL(href).hostname);
-        if (!isAuto || !isAuto.auto) {
-            return {
-                id: -1,
-            };
+        if (result && result.id) {
+            logger_1.default.log("info", `Wish with id ${result.id} successfully added to database`);
+            const isAuto = await this.access.isAutoAccess(new URL(href).hostname);
+            if (!isAuto || !isAuto.auto) {
+                return Object.assign(Object.assign({}, result), { isAuto: false });
+            }
+            return Object.assign(Object.assign({}, result), { isAuto: true });
         }
-        if (result && result.id)
-            return result;
     }
     async getWishesByID(client_id) {
         return await this.access.getWishesByID(client_id);
+    }
+    async getWishByID(wish_id) {
+        return await this.access.getWishByID(wish_id);
     }
     async deleteWish(id) {
         return await this.access.deleteWishByID(id);

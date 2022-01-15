@@ -42,9 +42,9 @@ async function createWish(instance, msg) {
     new main_wish_1.default()
         .create(msg.chat.id.toString(), new URL(msg.text).toString())
         .then(async (data) => {
-        if (data.id == -1) {
+        if (!data.isAuto) {
             logger_1.default.log("warning", `Unsupported hostname ${new URL(msg.text).hostname}`);
-            await handParse(instance, msg);
+            await handParse(instance, msg, data.id);
             return;
         }
         logger_1.default.log("info", `Желание с ID=${data.id} добавлено в очередь на обработку`);
@@ -56,10 +56,13 @@ exports.createWish = createWish;
 async function createWishDialog(instance, msg) {
     await instance.sendMessage(msg.chat.id, "Введите ссылку на товар");
     instance.once("message", async (msg) => {
-        if (msg.text.startsWith("http")) {
+        try {
+            new URL(msg.text.toString());
             await createWish(instance, msg);
         }
-        else {
+        catch (_err) {
+            const err = _err;
+            logger_1.default.log("error", err.message);
             await instance.sendMessage(msg.chat.id, "Неверный формат ссылки!");
         }
     });
@@ -168,7 +171,7 @@ ${result}
 `);
 }
 exports.createStatLink = createStatLink;
-async function handParse(instance, msg) {
+async function handParse(instance, msg, wish_id) {
     await instance.sendMessage(msg.chat.id, `
 В данный момент с этого сайта недоступен автоматический сбор информации. 
 Ввести самостоятельно?
@@ -178,7 +181,8 @@ async function handParse(instance, msg) {
                 [
                     {
                         text: "Да",
-                        callback_data: `hand_yes ${new URL(msg.text).toString()}`,
+                        // Too large chunk of data crashes the app
+                        callback_data: `hand_yes ${wish_id}`,
                     },
                     {
                         text: "Нет",

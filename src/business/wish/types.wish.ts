@@ -1,6 +1,6 @@
 import { ClientTGID } from "../client/types.client";
 
-export type WishDto = {
+export interface WishDto {
     id?: number
     client_id?: ClientTGID,
     title?: string,

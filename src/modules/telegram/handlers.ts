@@ -62,12 +62,12 @@ export async function createWish(
   new Wish()
     .create(msg.chat.id.toString(), new URL(msg.text).toString())
     .then(async (data) => {
-      if (data.id == -1) {
+      if (!data.isAuto) {
         Logger.log(
           "warning",
           `Unsupported hostname ${new URL(msg.text).hostname}`
         );
-        await handParse(instance, msg);
+        await handParse(instance, msg, data.id);
         return;
       }
       Logger.log(
@@ -85,9 +85,12 @@ export async function createWishDialog(
 ): Promise<string> {
   await instance.sendMessage(msg.chat.id, "Введите ссылку на товар");
   instance.once("message", async (msg) => {
-    if (msg.text.startsWith("http")) {
+    try {
+      new URL(msg.text.toString());
       await createWish(instance, msg);
-    } else {
+    } catch (_err) {
+      const err: Error = _err as Error;
+      Logger.log("error", err.message);
       await instance.sendMessage(msg.chat.id, "Неверный формат ссылки!");
     }
   });
@@ -239,7 +242,8 @@ ${result}
 
 export async function handParse(
   instance: TelegramBot,
-  msg: TelegramBot.Message
+  msg: TelegramBot.Message,
+  wish_id: number
 ) {
   await instance.sendMessage(
     msg.chat.id,
@@ -253,7 +257,8 @@ export async function handParse(
           [
             {
               text: "Да",
-              callback_data: `hand_yes ${new URL(msg.text).toString()}`,
+              // Too large chunk of data crashes the app
+              callback_data: `hand_yes ${wish_id}`,
             },
             {
               text: "Нет",
