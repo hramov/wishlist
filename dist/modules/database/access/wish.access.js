@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = __importDefault(require(".."));
+const performance_1 = require("../../../business/decorators/performance");
 const singletone_1 = require("../../../business/decorators/singletone");
 const client_access_1 = __importDefault(require("./client.access"));
 let WishAccess = class WishAccess {
@@ -114,6 +115,12 @@ let WishAccess = class WishAccess {
     `);
     }
 };
+__decorate([
+    performance_1.Timing,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:returntype", Promise)
+], WishAccess.prototype, "buyWish", null);
 WishAccess = __decorate([
     singletone_1.Singleton,
     __metadata("design:paramtypes", [Object])

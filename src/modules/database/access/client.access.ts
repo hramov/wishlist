@@ -4,6 +4,7 @@ import {
   ClientID,
   ClientTGID,
 } from "../../../business/client/types.client";
+import { Timing } from "../../../business/decorators/performance";
 import { DbInstance } from "../types";
 
 export default class ClientAccess {
@@ -56,6 +57,7 @@ export default class ClientAccess {
     `);
   }
 
+  @Timing
   async bindLoverAccess(
     client_id: ClientTGID,
     lover_id: ClientTGID

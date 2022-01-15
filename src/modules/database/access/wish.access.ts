@@ -1,5 +1,6 @@
 import Database from "..";
 import { ClientID, ClientTGID } from "../../../business/client/types.client";
+import { Timing } from "../../../business/decorators/performance";
 import { Singleton } from "../../../business/decorators/singletone";
 import { WishDto, WishID } from "../../../business/wish/types.wish";
 import { DbInstance, UnmanagedWish } from "../types";
@@ -78,6 +79,7 @@ export default class WishAccess {
       `);
   }
 
+  @Timing
   async buyWish(wish_id: WishID, client_id: ClientID): Promise<WishID> {
     return await this.db.oneOrNone(`
             UPDATE wish
