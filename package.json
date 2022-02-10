@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "dev": "nodemon ./src/app.ts",
-    "build": "tsc && git add . && echo 'Input the commit message' && read message && git commit -m \"$message\" && git push origin main"
+    "build": "tsc && git add . && echo 'Input the commit message' && read message && git commit -m \"$message\" && git push origin main",
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -30,13 +31,17 @@
     "cli-color": "^2.0.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.2",
-    "node-html-parser": "^5.2.0",
     "node-telegram-bot-api": "^0.56.0",
     "pg-promise": "^10.11.1",
     "puppeteer": "^13.0.1",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.16.7",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/jest": "^27.4.0",
+    "jest": "^27.4.7",
     "nodemon": "^2.0.15",
     "ts-node": "^10.4.0"
   }
