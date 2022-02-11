@@ -2,8 +2,8 @@
     "name": "selectors",
     "items": {
         "ozon": {
-            "title": "div.container > div > div > div > div > div > h1",
-            "price": "div.container > div > div > div > div > div > div:nth-child(1) > div > div > div > div > span > span",
+            "title": "#layoutPage > div > div.container > div > div > div > div > div > h1",
+            "price": "#layoutPage > div > div.container > div > div > div > div > div > div > div:nth-child(1) > div > div > div > div > span > span",
             "img": "img"
         },
         "wildberries": {}
